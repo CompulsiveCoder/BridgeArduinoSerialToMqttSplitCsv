@@ -4,5 +4,5 @@ echo "Initializing ipfs-cs project"
 echo "Dir: $PWD"
 
 cd lib
-sh get-libs.sh
+sh getlibs.sh
 cd $DIR
