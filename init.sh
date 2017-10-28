@@ -1,8 +1,10 @@
 DIR=$PWD
 
-echo "Initializing ipfs-cs project"
+echo "Initializing project"
 echo "Dir: $PWD"
 
 cd lib
 sh getlibs.sh
 cd $DIR
+
+git submodule update --init
