@@ -1,1 +1,1 @@
-mono src/BridgeArduinoSerialToMqttSplitCsv/bin/Release/BridgeArduinoSerialToMqttSplitCsv.exe
+mono bin/Release/BridgeArduinoSerialToMqttSplitCsv.exe
