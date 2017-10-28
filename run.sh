@@ -1,0 +1,1 @@
+mono src/BridgeArduinoSerialToMqttSplitCsv/bin/Release/BridgeArduinoSerialToMqttSplitCsv.exe
