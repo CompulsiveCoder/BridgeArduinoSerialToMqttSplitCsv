@@ -58,7 +58,7 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 					communicator.Close ();
 				}
 				catch (IOException ex) {
-					Console.WriteLine ("Error: Please ensure device is connected to port '" + serialPortName + "'.");
+					Console.WriteLine ("Error: Please ensure device is connected to port '" + serialPortName + "'.\n\n" + ex.Message);
 				}
 			}
 		}
