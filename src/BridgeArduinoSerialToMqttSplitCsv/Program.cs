@@ -12,9 +12,6 @@ namespace CSharpReadArduinoSerial
 	{
 		public static void Main (string[] args)
 		{
-			if (args.Length > 0)
-				setConfigFileAtRuntime(args);
-
 			var userId = ConfigurationSettings.AppSettings["UserId"];
 			var pass = ConfigurationSettings.AppSettings["Password"];
 			var host = ConfigurationSettings.AppSettings["Host"];
@@ -95,31 +92,6 @@ namespace CSharpReadArduinoSerial
 			string ReceivedMessage = Encoding.UTF8.GetString(e.Message);
 
 			//Console.WriteLine (ReceivedMessage);
-		}
-
-		protected static void setConfigFileAtRuntime(string[] args)
-		{
-			// Credit: https://www.codeproject.com/Articles/14465/Specify-a-Configuration-File-at-Runtime-for-a-C-Co
-
-			string runtimeconfigfile;
-
-			if (args.Length == 0)
-			{
-				Console.WriteLine("Please specify a config file:");
-				Console.Write("> "); // prompt
-				runtimeconfigfile = Console.ReadLine();
-			}
-			else
-			{
-				runtimeconfigfile = args[0];
-			}
-
-			// Specify config settings at runtime.
-			var config
-			= ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
-			config.AppSettings.File = runtimeconfigfile;
-			config.Save(ConfigurationSaveMode.Modified);
-			ConfigurationManager.RefreshSection("appSettings");
 		}
 	}
 }
