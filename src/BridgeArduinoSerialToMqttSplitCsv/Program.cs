@@ -5,6 +5,7 @@ using uPLibrary.Networking.M2Mqtt;
 using uPLibrary.Networking.M2Mqtt.Messages;
 using System.Text;
 using System.Configuration;
+using System.IO;
 
 namespace BridgeArduinoSerialToMqttSplitCsv
 {
@@ -17,38 +18,48 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 			var userId = GetConfigValue (arguments, "UserId");
 			var pass = GetConfigValue (arguments, "Password");
 			var host = GetConfigValue (arguments, "Host");
+			var serialPortName = GetConfigValue (arguments, "SerialPort");
 			var serialBaudRate = Convert.ToInt32(GetConfigValue (arguments, "SerialBaudRate"));
 
-			var detector = new DuinoPortDetector ();
-			var port = detector.Guess ();
+			if (String.IsNullOrEmpty (serialPortName)) {
+				var detector = new DuinoPortDetector ();
+				var port = detector.Guess ();
+				serialPortName = port.PortName;
+			}
+
 			//Console.WriteLine (port.PortName);
 			int i = 0;
 
-			using (var communicator = new DuinoCommunicator (port.PortName, serialBaudRate))
+			using (var communicator = new DuinoCommunicator (serialPortName, serialBaudRate))
 			{
 				//communicator.ReallyShortPause = 50;
-				communicator.Open ();
+				try{
+					communicator.Open ();
 
-				var isRunning = true;
+					var isRunning = true;
 
-				var client = new MqttClient (host);
+					var client = new MqttClient (host);
 
-				var clientId = Guid.NewGuid ().ToString ();
+					var clientId = Guid.NewGuid ().ToString ();
 
-				client.MqttMsgPublishReceived += client_MqttMsgPublishReceived;
-				client.Connect (clientId, userId, pass);
+					client.MqttMsgPublishReceived += client_MqttMsgPublishReceived;
+					client.Connect (clientId, userId, pass);
 
-				while (isRunning) {
-					var output = communicator.Read ();
+					while (isRunning) {
+						var output = communicator.Read ();
 
-					//Thread.Sleep (1);
+						//Thread.Sleep (1);
 
-					Publish (arguments, client, output);
-					
-					//Thread.Sleep (1);
+						Publish (arguments, client, output);
+						
+						//Thread.Sleep (1);
+					}
+
+					communicator.Close ();
 				}
-
-				communicator.Close ();
+				catch (IOException ex) {
+					Console.WriteLine ("Error: Please ensure device is connected to port '" + serialPortName + "'.");
+				}
 			}
 		}
 
