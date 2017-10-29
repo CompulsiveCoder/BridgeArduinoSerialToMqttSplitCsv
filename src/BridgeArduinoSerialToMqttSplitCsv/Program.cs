@@ -6,16 +6,18 @@ using uPLibrary.Networking.M2Mqtt.Messages;
 using System.Text;
 using System.Configuration;
 
-namespace CSharpReadArduinoSerial
+namespace BridgeArduinoSerialToMqttSplitCsv
 {
 	class MainClass
 	{
 		public static void Main (string[] args)
 		{
-			var userId = ConfigurationSettings.AppSettings["UserId"];
-			var pass = ConfigurationSettings.AppSettings["Password"];
-			var host = ConfigurationSettings.AppSettings["Host"];
-			var serialBaudRate = Convert.ToInt32(ConfigurationSettings.AppSettings["SerialBaudRate"]);
+			var arguments = new Arguments (args);
+
+			var userId = GetConfigValue (arguments, "UserId");
+			var pass = GetConfigValue (arguments, "Password");
+			var host = GetConfigValue (arguments, "Host");
+			var serialBaudRate = Convert.ToInt32(GetConfigValue (arguments, "SerialBaudRate"));
 
 			var detector = new DuinoPortDetector ();
 			var port = detector.Guess ();
@@ -41,7 +43,7 @@ namespace CSharpReadArduinoSerial
 
 					//Thread.Sleep (1);
 
-					Publish (client, output);
+					Publish (arguments, client, output);
 					
 					//Thread.Sleep (1);
 				}
@@ -50,7 +52,7 @@ namespace CSharpReadArduinoSerial
 			}
 		}
 
-		public static void Publish(MqttClient client, string data)
+		public static void Publish(Arguments arguments, MqttClient client, string data)
 		{
 			var incomingLinePrefix = ConfigurationSettings.AppSettings["IncomingLinePrefix"];
 
@@ -62,8 +64,8 @@ namespace CSharpReadArduinoSerial
 
 				var dividerCharacter = ConfigurationSettings.AppSettings["DividerSplitCharacter"].ToCharArray()[0];
 				var equalsCharacter = ConfigurationSettings.AppSettings["EqualsSplitCharacter"].ToCharArray()[0];
-				var userId = ConfigurationSettings.AppSettings["UserId"];
-				var deviceName = ConfigurationSettings.AppSettings["DeviceName"];
+				var userId = GetConfigValue (arguments, "UserId");
+				var deviceName = GetConfigValue (arguments, "DeviceName");
 				var topicPrefix = "/" + userId;
 				var useTopicPrefix = Convert.ToBoolean(ConfigurationSettings.AppSettings["UseTopicPrefix"]);
 
@@ -92,6 +94,18 @@ namespace CSharpReadArduinoSerial
 			string ReceivedMessage = Encoding.UTF8.GetString(e.Message);
 
 			//Console.WriteLine (ReceivedMessage);
+		}
+
+		public static string GetConfigValue(Arguments arguments, string argumentKey)
+		{
+			var value = String.Empty;
+
+			if (arguments.Contains (argumentKey))
+				value = arguments [argumentKey];
+			else
+				value = ConfigurationSettings.AppSettings[argumentKey];
+
+			return value;
 		}
 	}
 }
