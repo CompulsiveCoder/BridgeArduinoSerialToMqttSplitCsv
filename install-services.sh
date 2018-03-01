@@ -1,10 +1,10 @@
-FILES=svc/*
+echo "Installing services"
+FILES=svc/*.service
 for f in $FILES
 do
-  echo $f
   filename=$(basename "$f")
-  echo $filename
 
+  echo ""
   echo "Found service:"
   echo $filename
 
@@ -16,7 +16,11 @@ do
   sudo chmod 644 /lib/systemd/system/$filename
   sudo systemctl daemon-reload
   sudo systemctl enable $filename
+
+  echo "Finished installing service"
+  echo ""
 done
 
+echo "Finished install services"
 echo "Reboot required"
 #sudo reboot
