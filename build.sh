@@ -9,4 +9,4 @@ fi
 
 echo "Mode: $MODE"
 
-xbuild src/*.sln /p:Configuration=$MODE
+msbuild src/*.sln /p:Configuration=$MODE
