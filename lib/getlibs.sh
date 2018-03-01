@@ -8,5 +8,6 @@ fi
 echo "Installing libraries..."
 
 mono nuget.exe install M2Mqtt
+mono nuget.exe install duinocom.core -version 1.0.5
 
 echo "Installation complete!"
