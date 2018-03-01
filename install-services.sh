@@ -16,23 +16,7 @@ do
   sudo chmod 644 /lib/systemd/system/$filename
   sudo systemctl daemon-reload
   sudo systemctl enable $filename
-#  7za a -t7z /media/user/storage/zipped/${filename}.7z $f -mx9 -r -ppassword -mhe
 done
 
-#for filename in /Data/*.txt; do
-#    for ((i=0; i<=3; i++)); do
-#        ./MyProgram.exe "$filename" "Logs/$(basename "$filename" .txt)_Log$i.txt"
-    
-
-
-#
-#
-
-#sudo systemctl daemon-reload
-#sudo systemctl enable greensense-jenkins-docker.service
-
-#echo "Reboot required"
+echo "Reboot required"
 #sudo reboot
-
-#    done
-#done
