@@ -48,7 +48,7 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 					while (isRunning) {
 						var output = communicator.Read ();
 
-						//Thread.Sleep (1);
+						Thread.Sleep (300);
 
 						Publish (arguments, client, output);
 						
@@ -91,7 +91,7 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 						if (useTopicPrefix)
 							fullTopic = topicPrefix + fullTopic;
 					
-						Console.WriteLine (fullTopic);
+						Console.WriteLine(fullTopic + ":" + value);
 
 						client.Publish (fullTopic, Encoding.UTF8.GetBytes (value));
 					}
