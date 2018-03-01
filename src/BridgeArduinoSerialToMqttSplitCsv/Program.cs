@@ -12,54 +12,68 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 {
 	class MainClass
 	{
+		public static bool IsVerbose;
+
 		public static void Main (string[] args)
 		{
 			var arguments = new Arguments (args);
 
+			IsVerbose = arguments.Contains ("v");
 			var userId = GetConfigValue (arguments, "UserId");
 			var pass = GetConfigValue (arguments, "Password");
 			var host = GetConfigValue (arguments, "Host");
 			var serialPortName = GetConfigValue (arguments, "SerialPort");
-			var serialBaudRate = Convert.ToInt32(GetConfigValue (arguments, "SerialBaudRate"));
+			var serialBaudRate = Convert.ToInt32 (GetConfigValue (arguments, "SerialBaudRate"));
 			SerialPort port = null;
 
 			if (String.IsNullOrEmpty (serialPortName)) {
+				Console.WriteLine ("Serial port not specified. Detecting.");
 				var detector = new SerialPortDetector ();
 				port = detector.Detect ();
 				serialPortName = port.PortName;
+			} else {
+				Console.WriteLine ("Serial port specified");
+				port = new SerialPort (serialPortName, serialBaudRate);
 			}
 
-			Console.WriteLine (port.PortName);
+			Console.WriteLine ("Device name: " + GetConfigValue (arguments, "DeviceName"));
+			Console.WriteLine ("Port name: " + serialPortName);
 
-			var serialClient = new SerialClient (port);
+			if (port == null) {
+				Console.WriteLine ("Error: Device port not found.");
+			} else {
+				Console.WriteLine ("Serial port: " + port.PortName);
+
+				var serialClient = new SerialClient (port);
 
 				//communicator.ReallyShortPause = 50;
-			try{
-				serialClient.Open ();
+				try {
+					serialClient.Open ();
 
-				var isRunning = true;
+					var isRunning = true;
 
-				var mqttClient = new MqttClient (host);
+					var mqttClient = new MqttClient (host);
 
-				var clientId = Guid.NewGuid ().ToString ();
+					var clientId = Guid.NewGuid ().ToString ();
 
-				mqttClient.MqttMsgPublishReceived += client_MqttMsgPublishReceived;
-				mqttClient.Connect (clientId, userId, pass);
+					mqttClient.MqttMsgPublishReceived += client_MqttMsgPublishReceived;
+					mqttClient.Connect (clientId, userId, pass);
 
-				while (isRunning) {
-					var output = serialClient.Read ();
+					while (isRunning) {
+						var output = serialClient.Read ();
 
-					Thread.Sleep (300);
+						Thread.Sleep (300);
 
-					Publish (arguments, mqttClient, output);
+						Publish (arguments, mqttClient, output);
 					
-					//Thread.Sleep (1);
-				}
+						//Thread.Sleep (1);
+					}
 
-				serialClient.Close ();
-			}
-			catch (IOException ex) {
-				Console.WriteLine ("Error: Please ensure device is connected to port '" + serialPortName + "' and not already in use.\n\n" + ex.Message);
+					serialClient.Close ();
+				
+				} catch (IOException ex) {
+					Console.WriteLine ("Error: Please ensure device is connected to port '" + serialPortName + "' and not already in use.\n\n" + ex.Message);
+				}
 			}
 		}
 
@@ -111,10 +125,19 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 		{
 			var value = String.Empty;
 
-			if (arguments.Contains (argumentKey))
+			if (IsVerbose)
+				Console.WriteLine ("Getting config/argument value for: " + argumentKey);
+
+			if (arguments.Contains (argumentKey)) {
 				value = arguments [argumentKey];
-			else
-				value = ConfigurationSettings.AppSettings[argumentKey];
+				if (IsVerbose)
+					Console.WriteLine ("Found in arguments");
+			} else {
+				value = ConfigurationSettings.AppSettings [argumentKey];
+
+				if (IsVerbose)
+					Console.WriteLine ("Looking in config");
+			}
 
 			return value;
 		}
