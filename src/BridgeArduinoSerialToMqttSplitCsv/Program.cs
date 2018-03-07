@@ -7,12 +7,17 @@ using System.Text;
 using System.Configuration;
 using System.IO;
 using System.IO.Ports;
+using System.Collections.Generic;
 
 namespace BridgeArduinoSerialToMqttSplitCsv
 {
 	class MainClass
 	{
 		public static bool IsVerbose;
+
+		public static bool IsSubscribed = false;
+
+		public static SerialClient Client = null;
 
 		public static void Main (string[] args)
 		{
@@ -44,11 +49,11 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 			} else {
 				Console.WriteLine ("Serial port: " + port.PortName);
 
-				var serialClient = new SerialClient (port);
+				Client = new SerialClient (port);
 
 				//communicator.ReallyShortPause = 50;
 				try {
-					serialClient.Open ();
+					Client.Open ();
 
 					var isRunning = true;
 
@@ -59,17 +64,26 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 					mqttClient.MqttMsgPublishReceived += client_MqttMsgPublishReceived;
 					mqttClient.Connect (clientId, userId, pass);
 
+					var subscribeTopics = GetSubscribeTopics(arguments);
+					foreach (var topic in subscribeTopics)
+					{
+						mqttClient.Subscribe(new string[] {topic}, new byte[] { MqttMsgBase.QOS_LEVEL_AT_LEAST_ONCE });
+					}
+
+
 					while (isRunning) {
-						var output = serialClient.Read ();
+						var output = Client.Read ();
 
 						Thread.Sleep (300);
 
-						Publish (arguments, mqttClient, output);
+						var topics = new List<string>();
+
+						Publish (arguments, mqttClient, output, topics);
 					
 						//Thread.Sleep (1);
 					}
 
-					serialClient.Close ();
+					Client.Close ();
 				
 				} catch (IOException ex) {
 					Console.WriteLine ("Error: Please ensure device is connected to port '" + serialPortName + "' and not already in use.\n\n" + ex.Message);
@@ -77,7 +91,7 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 			}
 		}
 
-		public static void Publish(Arguments arguments, MqttClient client, string data)
+		public static void Publish(Arguments arguments, MqttClient client, string data, List<string> topics)
 		{
 			var incomingLinePrefix = ConfigurationSettings.AppSettings["IncomingLinePrefix"];
 
@@ -100,25 +114,46 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 						var key = parts [0];
 						var value = parts [1];
 
-						var fullTopic = "/" + deviceName + "/" + key;
+						if (!String.IsNullOrEmpty (value)) {
+							var fullTopic = "/" + deviceName + "/" + key;
 
-						if (useTopicPrefix)
-							fullTopic = topicPrefix + fullTopic;
+							if (useTopicPrefix)
+								fullTopic = topicPrefix + fullTopic;
 					
-						Console.WriteLine(fullTopic + ":" + value);
+							Console.WriteLine (fullTopic + ":" + value);
 
-						client.Publish (fullTopic, Encoding.UTF8.GetBytes (value));
+							if (!topics.Contains (fullTopic))
+								topics.Add (fullTopic);
+
+							client.Publish (fullTopic, Encoding.UTF8.GetBytes (value));
+						}
 					}
 				}
 			}
 		}
 
+		public static void Subscribe(Arguments arguments, MqttClient client, List<string> topics)
+		{
+			client.Subscribe(topics.ToArray(), new byte[] { MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE });
+				
+		/*	ushort msgId = client.Subscribe(topics.ToArray(),
+			new byte[] { MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE,            
+				MqttMsgBase.QOS_LEVEL_AT_LEAST_ONCE });*/
+		}
+
 		// this code runs when a message was received
 		public static void client_MqttMsgPublishReceived(object sender, MqttMsgPublishEventArgs e)
 		{
-			string ReceivedMessage = Encoding.UTF8.GetString(e.Message);
+			var topic = e.Topic;
+			var topicSections = topic.Split ('/');
+			var subTopic = topicSections [topicSections.Length - 2];
 
-			//Console.WriteLine (ReceivedMessage);
+			Console.WriteLine ("Subtopic: " + subTopic);
+
+			var message = System.Text.Encoding.Default.GetString(e.Message);
+			System.Console.WriteLine("Message received: " + message);
+
+			Client.WriteLine (subTopic + message);
 		}
 
 		public static string GetConfigValue(Arguments arguments, string argumentKey)
@@ -133,13 +168,43 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 				if (IsVerbose)
 					Console.WriteLine ("Found in arguments");
 			} else {
+
+				try{
 				value = ConfigurationSettings.AppSettings [argumentKey];
+				}
+				catch (Exception ex) {
+					Console.WriteLine("Failed to get configuration value: " + argumentKey);
+					throw ex;
+				}
 
 				if (IsVerbose)
 					Console.WriteLine ("Looking in config");
 			}
 
 			return value;
+		}
+
+		public static string[] GetSubscribeTopics(Arguments arguments)
+		{
+			var topics = GetConfigValue (arguments, "SubscribeTopics").Split (',');
+			var userId = GetConfigValue (arguments, "UserId");
+			var deviceName = GetConfigValue (arguments, "DeviceName");
+			var topicPrefix = "/" + userId;
+			var useTopicPrefix = Convert.ToBoolean(ConfigurationSettings.AppSettings["UseTopicPrefix"]);
+
+
+			var list = new List<String> ();
+
+			foreach (var topic in topics) {
+				var fullTopic = "/" + deviceName + "/" + topic + "/in";
+
+				if (useTopicPrefix)
+					fullTopic = topicPrefix + fullTopic;
+
+				list.Add (fullTopic);
+			}
+
+			return list.ToArray ();
 		}
 	}
 }
