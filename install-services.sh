@@ -12,10 +12,11 @@ do
 
   echo "Copying to /lib/systemd/system/:"
 
-  sudo cp -fv $f /lib/systemd/system/
+  sudo cp -fv $f /lib/systemd/system/$filename
   sudo chmod 644 /lib/systemd/system/$filename
   sudo systemctl daemon-reload
   sudo systemctl enable $filename
+  sudo systemctl start $filename
 
   echo "Finished installing service"
   echo ""

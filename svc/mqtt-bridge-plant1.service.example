@@ -4,7 +4,7 @@
 
  [Service]
  Type=idle
- ExecStart=/bin/sh -c "cd /home/$USER/workspace/GreenSense/Index/apps/BridgeArduinoSerialToMqttSplitCsv/ && (sh run.sh --DeviceName=Plant1 --SerialPort=/dev/ttyUSB0 > svc/Plant1Log.txt)"
+ ExecStart=/bin/sh -c "cd /home/j/workspace/GreenSense/Index/apps/BridgeArduinoSerialToMqttSplitCsv/ && (sh run.sh --DeviceName=Plant1 --SerialPort=/dev/ttyUSB0 > svc/Plant1Log.txt)"
 
  [Install]
  WantedBy=multi-user.target
