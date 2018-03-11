@@ -51,7 +51,6 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 
 				Client = new SerialClient (port);
 
-				//communicator.ReallyShortPause = 50;
 				try {
 					Client.Open ();
 
@@ -72,15 +71,17 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 
 
 					while (isRunning) {
-						var output = Client.Read ();
-
-						Thread.Sleep (300);
+						var output = "";
+						while (!output.Contains(";;"))
+						{	
+							Thread.Sleep(10);
+							output += Client.Read ();
+						}
 
 						var topics = new List<string>();
 
 						Publish (arguments, mqttClient, output, topics);
 					
-						//Thread.Sleep (1);
 					}
 
 					Client.Close ();
@@ -135,10 +136,6 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 		public static void Subscribe(Arguments arguments, MqttClient client, List<string> topics)
 		{
 			client.Subscribe(topics.ToArray(), new byte[] { MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE });
-				
-		/*	ushort msgId = client.Subscribe(topics.ToArray(),
-			new byte[] { MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE,            
-				MqttMsgBase.QOS_LEVEL_AT_LEAST_ONCE });*/
 		}
 
 		// this code runs when a message was received
