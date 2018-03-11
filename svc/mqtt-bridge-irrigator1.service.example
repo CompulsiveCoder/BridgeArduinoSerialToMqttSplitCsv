@@ -1,0 +1,10 @@
+ [Unit]
+ Description=MQTT Bridge Service
+ After=multi-user.target
+
+ [Service]
+ Type=idle
+ ExecStart=/bin/sh -c "cd /home/$USER/workspace/GreenSense/Index/apps/BridgeArduinoSerialToMqttSplitCsv/ && (sh run.sh --DeviceName=Irrigator1 --SerialPort=/dev/ttyUSB1 --SubscribeTopics=D,W,T,P,V,B,O > svc/Irrigator1Log.txt)"
+
+ [Install]
+ WantedBy=multi-user.target
