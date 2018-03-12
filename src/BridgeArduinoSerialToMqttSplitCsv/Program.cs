@@ -27,8 +27,12 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 			var userId = GetConfigValue (arguments, "UserId");
 			var pass = GetConfigValue (arguments, "Password");
 			var host = GetConfigValue (arguments, "Host");
+			var deviceName = GetConfigValue (arguments, "DeviceName");
 			var serialPortName = GetConfigValue (arguments, "SerialPort");
 			var serialBaudRate = Convert.ToInt32 (GetConfigValue (arguments, "SerialBaudRate"));
+			var topicPrefix = "/" + userId;
+			var useTopicPrefix = Convert.ToBoolean(ConfigurationSettings.AppSettings["UseTopicPrefix"]);
+
 			SerialPort port = null;
 
 			if (String.IsNullOrEmpty (serialPortName)) {
@@ -43,6 +47,13 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 
 			Console.WriteLine ("Device name: " + GetConfigValue (arguments, "DeviceName"));
 			Console.WriteLine ("Port name: " + serialPortName);
+
+			var deviceTopic = "/" + deviceName;
+
+			if (useTopicPrefix)
+				deviceTopic = topicPrefix + deviceTopic;
+
+			Console.WriteLine (deviceTopic + "/[Key]");
 
 			if (port == null) {
 				Console.WriteLine ("Error: Device port not found.");
@@ -74,13 +85,15 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 						var output = "";
 						while (!output.Contains(";;"))
 						{	
-							Thread.Sleep(10);
+							Thread.Sleep(1);
 							output += Client.Read ();
 						}
 
 						var topics = new List<string>();
 
 						Publish (arguments, mqttClient, output, topics);
+
+						Thread.Sleep(5);
 					
 					}
 
@@ -109,6 +122,11 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 				var topicPrefix = "/" + userId;
 				var useTopicPrefix = Convert.ToBoolean(ConfigurationSettings.AppSettings["UseTopicPrefix"]);
 
+				var deviceTopic = "/" + deviceName;
+
+				if (useTopicPrefix)
+					deviceTopic = topicPrefix + deviceTopic;
+
 				foreach (var item in data.Split(dividerCharacter)) {
 					var parts = item.Split (equalsCharacter);
 					if (parts.Length == 2) {
@@ -116,12 +134,10 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 						var value = parts [1];
 
 						if (!String.IsNullOrEmpty (value)) {
-							var fullTopic = "/" + deviceName + "/" + key;
+							var fullTopic = deviceTopic + "/" + key;
 
-							if (useTopicPrefix)
-								fullTopic = topicPrefix + fullTopic;
-					
-							Console.WriteLine (fullTopic + ":" + value);
+							if (IsVerbose)
+								Console.WriteLine (fullTopic + ":" + value);
 
 							if (!topics.Contains (fullTopic))
 								topics.Add (fullTopic);
@@ -145,11 +161,15 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 			var topicSections = topic.Split ('/');
 			var subTopic = topicSections [topicSections.Length - 2];
 
-			Console.WriteLine ("Subtopic: " + subTopic);
+			if (IsVerbose)
+				Console.WriteLine ("Subtopic: " + subTopic);
 
 			var message = System.Text.Encoding.Default.GetString(e.Message);
-			System.Console.WriteLine("Message received: " + message);
 
+			if (IsVerbose)
+				Console.WriteLine("Message received: " + message);
+
+			Console.WriteLine(subTopic + message);
 			Client.WriteLine (subTopic + message);
 		}
 
