@@ -1,13 +1,15 @@
 ﻿using System;
 using duinocom;
 using System.Threading;
-using uPLibrary.Networking.M2Mqtt;
-using uPLibrary.Networking.M2Mqtt.Messages;
 using System.Text;
 using System.Configuration;
 using System.IO;
 using System.IO.Ports;
 using System.Collections.Generic;
+using System.Threading.Tasks;
+using System.Runtime;
+using uPLibrary.Networking.M2Mqtt;
+using uPLibrary.Networking.M2Mqtt.Messages;
 
 namespace BridgeArduinoSerialToMqttSplitCsv
 {
@@ -65,9 +67,11 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 				try {
 					Client.Open ();
 
+					Console.WriteLine(Client.Read());
+
 					var isRunning = true;
 
-					var mqttClient = new MqttClient (host);
+					var mqttClient = new MqttClient(host);
 
 					var clientId = Guid.NewGuid ().ToString ();
 
@@ -77,7 +81,7 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 					var subscribeTopics = GetSubscribeTopics(arguments);
 					foreach (var topic in subscribeTopics)
 					{
-						mqttClient.Subscribe(new string[] {topic}, new byte[] { MqttMsgBase.QOS_LEVEL_AT_LEAST_ONCE });
+						mqttClient.Subscribe(new string[] {topic}, new byte[] { MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE });
 					}
 
 
@@ -85,15 +89,19 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 						var output = "";
 						while (!output.Contains(";;"))
 						{	
-							Thread.Sleep(1);
+						//	Thread.Sleep(1);
 							output += Client.Read ();
 						}
+
+						//Console.WriteLine("----- Serial output");
+						//Console.WriteLine(output);
+						//Console.WriteLine("-----");
 
 						var topics = new List<string>();
 
 						Publish (arguments, mqttClient, output, topics);
 
-						Thread.Sleep(5);
+						//Thread.Sleep(10);
 					
 					}
 
@@ -105,15 +113,19 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 			}
 		}
 
-		public static void Publish(Arguments arguments, MqttClient client, string data, List<string> topics)
+		public static void Publish(Arguments arguments, MqttClient client, string output, List<string> topics)
 		{
 			var incomingLinePrefix = ConfigurationSettings.AppSettings["IncomingLinePrefix"];
 
-			var isValidDataLine = !String.IsNullOrEmpty (data.Trim ())
-			                      && data.StartsWith (incomingLinePrefix);
+			var data = GetLastDataLine (output);
 
-			if (isValidDataLine) {
+			if (!String.IsNullOrEmpty(data)) {
+				//if (IsVerbose)
+				Console.WriteLine("----- Data");
 				Console.WriteLine (data);
+				Console.WriteLine ("-----");
+				//else
+				//	Console.WriteLine (".");
 
 				var dividerCharacter = ConfigurationSettings.AppSettings["DividerSplitCharacter"].ToCharArray()[0];
 				var equalsCharacter = ConfigurationSettings.AppSettings["EqualsSplitCharacter"].ToCharArray()[0];
@@ -149,11 +161,6 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 			}
 		}
 
-		public static void Subscribe(Arguments arguments, MqttClient client, List<string> topics)
-		{
-			client.Subscribe(topics.ToArray(), new byte[] { MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE });
-		}
-
 		// this code runs when a message was received
 		public static void client_MqttMsgPublishReceived(object sender, MqttMsgPublishEventArgs e)
 		{
@@ -187,7 +194,7 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 			} else {
 
 				try{
-				value = ConfigurationSettings.AppSettings [argumentKey];
+					value = ConfigurationManager.AppSettings [argumentKey];
 				}
 				catch (Exception ex) {
 					Console.WriteLine("Failed to get configuration value: " + argumentKey);
@@ -223,5 +230,54 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 
 			return list.ToArray ();
 		}
+		
+		public static Dictionary<string, int> ParseOutputLine(string outputLine)
+		{
+			var dictionary = new Dictionary<string, int> ();
+
+			if (IsValidOutputLine (outputLine)) {
+				foreach (var pair in outputLine.Split(';')) {
+					var parts = pair.Split (':');
+
+					if (parts.Length == 2) {
+						var key = parts [0];
+						var value = 0;
+						try {
+							value = Convert.ToInt32 (parts [1]);
+
+							dictionary [key] = value;
+						} catch {
+							Console.WriteLine ("Warning: Invalid key/value pair '" + pair + "'");
+						}
+					}
+				}
+			}
+
+			return dictionary;
+		}
+
+		public static string GetLastDataLine(string output)
+		{
+			var lines = output.Split ('\n');
+
+			for (int i = lines.Length - 1; i >= 0; i--) {
+				var line = lines [i].Trim();
+				if (IsValidOutputLine(line))
+					return line;
+			}
+
+			return String.Empty;
+		}
+
+		public static bool IsValidOutputLine(string outputLine)
+		{
+			var dataPrefix = "D;";
+
+			var dataPostFix = ";;";
+
+			return outputLine.StartsWith(dataPrefix)
+				&& outputLine.EndsWith(dataPostFix);
+		}
+
 	}
 }

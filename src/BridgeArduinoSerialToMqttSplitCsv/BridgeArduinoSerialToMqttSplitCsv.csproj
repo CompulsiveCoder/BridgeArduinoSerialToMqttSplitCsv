@@ -20,6 +20,7 @@
     <WarningLevel>4</WarningLevel>
     <Externalconsole>true</Externalconsole>
     <PlatformTarget>x86</PlatformTarget>
+    <Commandlineparameters>--DeviceName=DevIrrigator1 --SerialPort=/dev/ttyUSB2 --SubscribeTopics=D,W,T,P,V,B,O</Commandlineparameters>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <DebugType>full</DebugType>
@@ -36,10 +37,10 @@
     <Reference Include="duinocom.core">
       <HintPath>..\..\lib\duinocom.core.1.0.5\lib\net40\duinocom.core.dll</HintPath>
     </Reference>
+    <Reference Include="System.Configuration" />
     <Reference Include="M2Mqtt.Net">
       <HintPath>..\..\lib\M2Mqtt.4.3.0.0\lib\net45\M2Mqtt.Net.dll</HintPath>
     </Reference>
-    <Reference Include="System.Configuration" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Program.cs" />
