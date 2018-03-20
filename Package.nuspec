@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>BridgeArduinoSerialToMqttSplitCsv</id>
+    <version>1.0.0</version>
+    <authors>compulsivecoder</authors>
+    <owners>compulsivecoder</owners>
+    <projectUrl>https://github.com/CompulsiveCoder/BridgeArduinoSerialToMqttSplitCsv</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>A service for broadcasting arduino serial data to an MQTT broker.</description>
+    <copyright>Copyright 2017</copyright>
+    <tags>arduino</tags>
+  </metadata>
+  <files>
+      <file src="bin/Release/BridgeArduinoSerialToMqttSplitCsv.exe" target="lib/net40" />
+      <file src="bin/Release/BridgeArduinoSerialToMqttSplitCsv.exe.config" target="lib/net40" />
+      <file src="bin/Release/duinocom.core.dll" target="lib/net40" />
+      <file src="bin/Release/M2Mqtt.Net.dll" target="lib/net40" />
+  </files>
+</package>
