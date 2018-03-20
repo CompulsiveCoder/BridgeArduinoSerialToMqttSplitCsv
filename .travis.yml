@@ -8,9 +8,10 @@ install:
   - git checkout $TRAVIS_BRANCH
   - sh prepare.sh
   - sh init.sh
+  - git remote set-url origin https://$GHTOKEN@github.com/CompulsiveCoder/BridgeArduinoSerialToMqttSplitCsv.git
 
 script:
-  - git remote set-url origin https://$GHTOKEN@github.com/CompulsiveCoder/BridgeArduinoSerialToMqttSplitCsv.git
+  - sh build.sh
   - sh test.sh
   - sh nuget-set-api-key.sh $NUGETTOKEN
   - sh nuget-pack-and-push.sh
