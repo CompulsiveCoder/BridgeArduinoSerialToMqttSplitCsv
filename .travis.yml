@@ -12,6 +12,6 @@ install:
 
 script:
   - sh test-and-graduate.sh
-  - sh nuget-set-api-key.sh "${NUGETTOKEN}"
+  - sh nuget-set-api-key.sh ${NUGETTOKEN}
   - sh nuget-pack-and-push.sh
   - sh push-version.sh
