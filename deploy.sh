@@ -5,7 +5,7 @@ mkdir -p app
 
 cp -f bin/Release/*.exe app/
 cp -f bin/Release/*.dll app/
-cp -f bin/Release/*.mdb app/
+# cp -f bin/Release/*.mdb app/
 
 if [ ! -e "app/BridgeArduinoSerialToMqttSplitCsv.exe.config" ]; then
     cp bin/Release/BridgeArduinoSerialToMqttSplitCsv.exe.config app/
