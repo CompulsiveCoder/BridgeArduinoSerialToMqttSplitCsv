@@ -14,5 +14,5 @@ script:
   - sh test.sh
   - sh nuget-set-api-key.sh $NUGETTOKEN
   - sh nuget-pack-and-push.sh
-  - sh graduate.sh
   - sh push-version.sh
+  - sh graduate.sh
