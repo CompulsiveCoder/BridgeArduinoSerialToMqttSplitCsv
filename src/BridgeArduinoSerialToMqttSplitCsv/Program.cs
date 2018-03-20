@@ -25,6 +25,11 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 		{
 			var arguments = new Arguments (args);
 
+			Run (arguments);
+		}
+
+		public static void Run(Arguments arguments)
+		{
 			IsVerbose = arguments.Contains ("v");
 			var userId = GetConfigValue (arguments, "UserId");
 			var pass = GetConfigValue (arguments, "Password");
@@ -89,7 +94,7 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 						var output = "";
 						while (!output.Contains(";;"))
 						{	
-						//	Thread.Sleep(1);
+							//	Thread.Sleep(1);
 							output += Client.Read ();
 						}
 
@@ -102,13 +107,19 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 						Publish (arguments, mqttClient, output, topics);
 
 						//Thread.Sleep(10);
-					
+
 					}
 
 					Client.Close ();
-				
+
 				} catch (IOException ex) {
-					Console.WriteLine ("Error: Please ensure device is connected to port '" + serialPortName + "' and not already in use.\n\n" + ex.Message);
+					Console.WriteLine ("Connection lost with: " + serialPortName);
+					Console.WriteLine(ex.Message);
+					Console.WriteLine ();
+					Console.WriteLine ("Waiting for 10 seconds then retrying");
+
+					Thread.Sleep (10000);
+					Run (arguments);
 				}
 			}
 		}
