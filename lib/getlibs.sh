@@ -7,6 +7,6 @@ fi
 
 echo "Installing libraries..."
 
-mono nuget.exe install M2Mqtt
+mono nuget.exe install M2Mqtt &&
 
 echo "Installation complete!"
