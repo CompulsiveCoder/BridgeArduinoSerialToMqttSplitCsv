@@ -5,6 +5,8 @@ if [ ! -f nuget.exe ]; then
     wget http://nuget.org/nuget.exe
 fi
 
+mono nuget.exe update -self
+
 echo "Installing libraries..."
 
 mono nuget.exe install M2Mqtt
