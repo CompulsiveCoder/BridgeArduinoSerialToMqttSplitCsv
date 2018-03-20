@@ -9,4 +9,4 @@ sudo echo "deb http://download.mono-project.com/repo/debian wheezy main" > mono-
 sudo cp mono-xamarin.list /etc/apt/sources.list.d/mono-xamarin.list
 
 sudo apt-get update -qq
-sudo apt-get install -y --no-install-recommends git wget mono-complete msbuild mono-devel ca-certificates-mono
+sudo apt-get install -y --no-install-recommends udev git wget mono-complete msbuild mono-devel ca-certificates-mono
