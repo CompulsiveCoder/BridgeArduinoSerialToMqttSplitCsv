@@ -12,5 +12,5 @@ install:
 script:
   - git remote set-url origin https://$GHTOKEN@github.com/CompulsiveCoder/BridgeArduinoSerialToMqttSplitCsv.git
   - sh test-and-graduate.sh
-  - sh nuget-set-api-key.sh ${NUGETTOKEN} && sh nuget-pack-and-push.sh
+  - sh nuget-set-api-key.sh $NUGETTOKEN && sh nuget-pack-and-push.sh
   - sh push-version.sh
