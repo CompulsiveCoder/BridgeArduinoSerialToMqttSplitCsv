@@ -169,6 +169,15 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 						}
 					}
 				}
+
+				var timeTopic = deviceTopic + "/Time";
+
+				var time = DateTime.Now.ToString ("MM/dd/yyyy HH:mm:ss");
+
+				if (IsVerbose)
+					Console.WriteLine (timeTopic + ":" + time);
+
+				client.Publish (timeTopic, Encoding.UTF8.GetBytes (time));
 			}
 		}
 
