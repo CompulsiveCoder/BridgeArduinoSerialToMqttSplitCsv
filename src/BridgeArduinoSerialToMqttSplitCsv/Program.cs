@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using duinocom;
 using System.Threading;
 using System.Text;
@@ -70,10 +70,6 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 				Client = new SerialClient (port);
 
 				try {
-					Client.Open ();
-
-					Console.WriteLine(Client.Read());
-
 					var isRunning = true;
 
 					var mqttClient = new MqttClient(host);
@@ -91,12 +87,17 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 
 
 					while (isRunning) {
+						
+						Client.Open ();
+
 						var output = "";
 						while (!output.Contains(";;"))
 						{	
 							//	Thread.Sleep(1);
 							output += Client.Read ();
 						}
+						
+						Client.Close();
 
 						//Console.WriteLine("----- Serial output");
 						//Console.WriteLine(output);
@@ -197,7 +198,9 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 				Console.WriteLine("Message received: " + message);
 
 			Console.WriteLine(subTopic + message);
+			Client.Open();
 			Client.WriteLine (subTopic + message);
+			Client.Close();
 		}
 
 		public static string GetConfigValue(Arguments arguments, string argumentKey)
