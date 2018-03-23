@@ -89,7 +89,6 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 					while (isRunning) {
 						
 						Client.Open ();
-
 						var output = "";
 						while (!output.Contains(";;"))
 						{	
@@ -111,7 +110,7 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 
 					}
 
-				} catch (IOException ex) {
+				} catch (Exception ex) {
 					Console.WriteLine ("Connection lost with: " + serialPortName);
 					Console.WriteLine(ex.Message);
 					Console.WriteLine ();
