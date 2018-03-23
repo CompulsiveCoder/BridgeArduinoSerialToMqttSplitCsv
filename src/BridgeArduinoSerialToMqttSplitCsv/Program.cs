@@ -111,8 +111,6 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 
 					}
 
-					Client.Close ();
-
 				} catch (IOException ex) {
 					Console.WriteLine ("Connection lost with: " + serialPortName);
 					Console.WriteLine(ex.Message);
