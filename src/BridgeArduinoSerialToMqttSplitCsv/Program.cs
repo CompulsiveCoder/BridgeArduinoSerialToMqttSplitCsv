@@ -70,12 +70,15 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 				Client = new SerialClient (port);
 
 				try {
-					Client.Open ();
-					Thread.Sleep(100);
+
+					if (!Client.Port.IsOpen)
+						Client.Open ();	
+					
+					//Thread.Sleep(100);
 					var output = Client.Read ();
 					Console.WriteLine(output);
-					Thread.Sleep(100);
-					Client.Close();
+					//Thread.Sleep(100);
+					//Client.Close();
 
 					var isRunning = true;
 
@@ -94,9 +97,11 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 
 
 					while (isRunning) {
+
+						if (!Client.Port.IsOpen)
+							Client.Open ();	
 						
-						Client.Open ();	
-						Thread.Sleep(100);
+						//Thread.Sleep(100);
 						output = "";
 						while (!output.Contains(";;"))
 						{	
@@ -105,8 +110,8 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 								output += value;
 						}
 
-						Thread.Sleep(100);
-						Client.Close();
+						//Thread.Sleep(100);
+						//Client.Close();
 
 						//Console.WriteLine("----- Serial output");
 						//Console.WriteLine(output);
@@ -214,11 +219,12 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 			
 			try
 			{
-				Client.Open();
-				Thread.Sleep(100);
+				if (!Client.Port.IsOpen)
+					Client.Open ();	
+				
 				Client.WriteLine (message);
-				Thread.Sleep(100);
-				Client.Close();
+
+				//Client.Close();
 			}
 			catch (Exception ex)
 			{
@@ -229,6 +235,7 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 				Console.WriteLine ("Waiting for 10 seconds then retrying");
 
 				Thread.Sleep (10000);
+
 				SendMessageToDevice (message);
 			}
 		}
