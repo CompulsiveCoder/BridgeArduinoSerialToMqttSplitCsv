@@ -122,7 +122,7 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 
 				} catch (Exception ex) {
 					Console.WriteLine ("Connection lost with: " + serialPortName);
-					Console.WriteLine(ex.Message);
+					Console.WriteLine(ex.ToString());
 					Console.WriteLine ();
 					Console.WriteLine ("Waiting for 10 seconds then retrying");
 
@@ -224,7 +224,7 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 			{
 				
 				Console.WriteLine ("Failed to send message to device");
-				Console.WriteLine(ex.Message);
+				Console.WriteLine(ex.ToString());
 				Console.WriteLine ();
 				Console.WriteLine ("Waiting for 10 seconds then retrying");
 
