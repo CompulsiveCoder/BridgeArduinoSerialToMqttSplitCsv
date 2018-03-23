@@ -195,9 +195,30 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 				Console.WriteLine("Message received: " + message);
 
 			Console.WriteLine(subTopic + message);
-			Client.Open();
-			Client.WriteLine (subTopic + message);
-			Client.Close();
+			
+			SendMessageToDevice(message);
+		}
+		
+		public static void SendMessageToDevice(string message)
+		{
+			
+			try
+			{
+				Client.Open();
+				Client.WriteLine (message);
+				Client.Close();
+			}
+			catch (Exception ex)
+			{
+				
+				Console.WriteLine ("Failed to send message to device");
+				Console.WriteLine(ex.Message);
+				Console.WriteLine ();
+				Console.WriteLine ("Waiting for 10 seconds then retrying");
+
+				Thread.Sleep (10000);
+				SendMessageToDevice (message);
+			}
 		}
 
 		public static string GetConfigValue(Arguments arguments, string argumentKey)
