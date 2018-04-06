@@ -70,6 +70,16 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 				Client = new SerialClient (port);
 
 				try {
+
+					if (!Client.Port.IsOpen)
+						Client.Open ();	
+					
+					//Thread.Sleep(100);
+					var output = Client.Read ();
+					Console.WriteLine(output);
+					//Thread.Sleep(100);
+					//Client.Close();
+
 					var isRunning = true;
 
 					var mqttClient = new MqttClient(host);
@@ -87,16 +97,22 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 
 
 					while (isRunning) {
+
+						if (!Client.Port.IsOpen)
+							Client.Open ();	
 						
-						Client.Open ();
-						var output = "";
+						//Thread.Sleep(100);
+						output = "";
 						while (!output.Contains(";;"))
 						{	
-							//	Thread.Sleep(1);
-							output += Client.Read ();
+							var value = Client.Read ();
+							if (!String.IsNullOrEmpty(value))
+								output += value;
+							Thread.Sleep(10);
 						}
-						
-						Client.Close();
+
+						//Thread.Sleep(100);
+						//Client.Close();
 
 						//Console.WriteLine("----- Serial output");
 						//Console.WriteLine(output);
@@ -112,7 +128,7 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 
 				} catch (Exception ex) {
 					Console.WriteLine ("Connection lost with: " + serialPortName);
-					Console.WriteLine(ex.Message);
+					Console.WriteLine(ex.ToString());
 					Console.WriteLine ();
 					Console.WriteLine ("Waiting for 10 seconds then retrying");
 
@@ -203,25 +219,29 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 
 			Console.WriteLine(subTopic + message);
 			
-			SendMessageToDevice(message);
+			SendMessageToDevice(subTopic + message);
 		}
 		
 		public static void SendMessageToDevice(string message)
 		{
 			try
 			{
-				Client.Open();
+				if (!Client.Port.IsOpen)
+					Client.Open ();	
+				
 				Client.WriteLine (message);
-				Client.Close();
+
+				//Client.Close();
 			}
 			catch (Exception ex)
 			{
 				Console.WriteLine ("Failed to send message to device");
-				Console.WriteLine(ex.Message);
+				Console.WriteLine(ex.ToString());
 				Console.WriteLine ();
 				Console.WriteLine ("Waiting for 10 seconds then retrying");
 
 				Thread.Sleep (10000);
+
 				SendMessageToDevice (message);
 			}
 		}
