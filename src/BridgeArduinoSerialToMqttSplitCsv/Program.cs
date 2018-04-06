@@ -176,6 +176,13 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 					Console.WriteLine (timeTopic + ":" + time);
 
 				client.Publish (timeTopic, Encoding.UTF8.GetBytes (time));
+
+				var pushNotificationTopic = "/push/" + deviceName;
+
+				if (IsVerbose)
+					Console.WriteLine (pushNotificationTopic + ":Updated");
+
+				client.Publish (pushNotificationTopic, Encoding.UTF8.GetBytes ("Updated"));
 			}
 		}
 
@@ -201,7 +208,6 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 		
 		public static void SendMessageToDevice(string message)
 		{
-			
 			try
 			{
 				Client.Open();
@@ -210,7 +216,6 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 			}
 			catch (Exception ex)
 			{
-				
 				Console.WriteLine ("Failed to send message to device");
 				Console.WriteLine(ex.Message);
 				Console.WriteLine ();
