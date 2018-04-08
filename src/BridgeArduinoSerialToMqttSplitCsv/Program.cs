@@ -179,7 +179,9 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 							if (!topics.Contains (fullTopic))
 								topics.Add (fullTopic);
 
-							client.Publish (fullTopic, Encoding.UTF8.GetBytes (value));
+							client.Publish (fullTopic, Encoding.UTF8.GetBytes (value),
+			                	MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE, // QoS level
+			                	true);
 						}
 					}
 				}
@@ -191,7 +193,9 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 				if (IsVerbose)
 					Console.WriteLine (timeTopic + ":" + time);
 
-				client.Publish (timeTopic, Encoding.UTF8.GetBytes (time));
+				client.Publish (timeTopic, Encoding.UTF8.GetBytes (time),
+                	MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE, // QoS level
+                	true);
 
 				var pushNotificationTopic = "/push/" + deviceName;
 
