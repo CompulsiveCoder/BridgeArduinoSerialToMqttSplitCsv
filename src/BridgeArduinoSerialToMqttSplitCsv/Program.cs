@@ -210,7 +210,9 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 				if (IsVerbose)
 					Console.WriteLine (pushNotificationTopic + ":Updated");
 
-				client.Publish (pushNotificationTopic, Encoding.UTF8.GetBytes ("Updated"));
+				client.Publish (pushNotificationTopic, Encoding.UTF8.GetBytes ("Updated"),
+                	MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE, // QoS level
+                	false);
 			}
 		}
 
