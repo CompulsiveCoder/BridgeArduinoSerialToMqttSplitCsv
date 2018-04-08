@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Runtime;
 using uPLibrary.Networking.M2Mqtt;
 using uPLibrary.Networking.M2Mqtt.Messages;
+using System.Diagnostics;
 
 namespace BridgeArduinoSerialToMqttSplitCsv
 {
@@ -94,7 +95,14 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 					{
 						mqttClient.Subscribe(new string[] {topic}, new byte[] { MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE });
 					}
+					
+					var assembly = System.Reflection.Assembly.GetExecutingAssembly();
+					var fvi = FileVersionInfo.GetVersionInfo(assembly.Location);
+					var version = fvi.FileVersion;
 
+					mqttClient.Publish ("/" + deviceName + "/bridge/version", Encoding.UTF8.GetBytes (version),
+	                	MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE, // QoS level
+	                	true);
 
 					while (isRunning) {
 
