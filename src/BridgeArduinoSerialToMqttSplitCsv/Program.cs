@@ -166,11 +166,14 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 				var deviceName = GetConfigValue (arguments, "DeviceName");
 				var topicPrefix = "/" + userId;
 				var useTopicPrefix = Convert.ToBoolean(ConfigurationSettings.AppSettings["UseTopicPrefix"]);
+				var summaryKey = GetConfigValue (arguments, "SummaryKey");
 
 				var deviceTopic = "/" + deviceName;
 
 				if (useTopicPrefix)
 					deviceTopic = topicPrefix + deviceTopic;
+					
+				var summaryValue = 0;
 
 				foreach (var item in data.Split(dividerCharacter)) {
 					var parts = item.Split (equalsCharacter);
@@ -179,6 +182,9 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 						var value = parts [1];
 
 						if (!String.IsNullOrEmpty (value)) {
+							if (key == summaryKey)
+								summaryValue = Convert.ToInt32(value);
+							
 							var fullTopic = deviceTopic + "/" + key;
 
 							if (IsVerbose)
@@ -188,7 +194,7 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 								topics.Add (fullTopic);
 
 							client.Publish (fullTopic, Encoding.UTF8.GetBytes (value),
-			                	MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE, // QoS level
+			                	MqttMsgBase.QOS_LEVEL_AT_LEAST_ONCE, // QoS level
 			                	true);
 						}
 					}
@@ -202,15 +208,17 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 					Console.WriteLine (timeTopic + ":" + time);
 
 				client.Publish (timeTopic, Encoding.UTF8.GetBytes (time),
-                	MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE, // QoS level
+                	MqttMsgBase.QOS_LEVEL_AT_LEAST_ONCE, // QoS level
                 	true);
 
 				var pushNotificationTopic = "/push/" + deviceName;
 
 				if (IsVerbose)
-					Console.WriteLine (pushNotificationTopic + ":Updated");
+					Console.WriteLine (pushNotificationTopic + ":" + deviceName + ":" + summaryValue);
+					
+				var pushSummary = deviceName + ":" + summaryValue;
 
-				client.Publish (pushNotificationTopic, Encoding.UTF8.GetBytes ("Updated"),
+				client.Publish (pushNotificationTopic, Encoding.UTF8.GetBytes (pushSummary),
                 	MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE, // QoS level
                 	false);
 			}
