@@ -14,6 +14,7 @@ script:
   - sh inject-version.sh
   - sh build.sh
   - sh test.sh
+  - sh clean.sh
   - sh nuget-set-api-key.sh $NUGETTOKEN
   - sh nuget-pack-and-push.sh
   - sh push-version.sh
