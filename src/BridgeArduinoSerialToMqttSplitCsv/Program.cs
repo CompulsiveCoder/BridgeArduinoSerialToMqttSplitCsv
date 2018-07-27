@@ -22,61 +22,72 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 
 		public static SerialClient Client = null;
 
-		public static void Main (string[] args)
-		{
-			var arguments = new Arguments (args);
+		public static string IncomingKeyValueSeparator = "";
 
-			Run (arguments);
+		public static void Main(string[] args)
+		{
+			var arguments = new Arguments(args);
+
+			Run(arguments);
 		}
 
 		public static void Run(Arguments arguments)
 		{
-			IsVerbose = arguments.Contains ("v");
-			var userId = GetConfigValue (arguments, "UserId");
-			var pass = GetConfigValue (arguments, "Password");
-			var host = GetConfigValue (arguments, "Host");
-			var deviceName = GetConfigValue (arguments, "DeviceName");
-			var serialPortName = GetConfigValue (arguments, "SerialPort");
-			var serialBaudRate = Convert.ToInt32 (GetConfigValue (arguments, "SerialBaudRate"));
+			IsVerbose = arguments.Contains("v");
+			var userId = GetConfigValue(arguments, "UserId");
+			var pass = GetConfigValue(arguments, "Password");
+			var host = GetConfigValue(arguments, "Host");
+			var deviceName = GetConfigValue(arguments, "DeviceName");
+			var serialPortName = GetConfigValue(arguments, "SerialPort");
+			var serialBaudRate = Convert.ToInt32(GetConfigValue(arguments, "SerialBaudRate"));
 			var topicPrefix = "/" + userId;
 			var useTopicPrefix = Convert.ToBoolean(ConfigurationSettings.AppSettings["UseTopicPrefix"]);
+			IncomingKeyValueSeparator = GetConfigValue(arguments, "IncomingKeyValueSeparator");
+
 
 			SerialPort port = null;
 
-			if (String.IsNullOrEmpty (serialPortName)) {
-				Console.WriteLine ("Serial port not specified. Detecting.");
-				var detector = new SerialPortDetector ();
-				port = detector.Detect ();
+			if (String.IsNullOrEmpty(serialPortName))
+			{
+				Console.WriteLine("Serial port not specified. Detecting.");
+				var detector = new SerialPortDetector();
+				port = detector.Detect();
 				serialPortName = port.PortName;
-			} else {
-				Console.WriteLine ("Serial port specified");
-				port = new SerialPort (serialPortName, serialBaudRate);
+			}
+			else
+			{
+				Console.WriteLine("Serial port specified");
+				port = new SerialPort(serialPortName, serialBaudRate);
 			}
 
-			Console.WriteLine ("Device name: " + GetConfigValue (arguments, "DeviceName"));
-			Console.WriteLine ("Port name: " + serialPortName);
+			Console.WriteLine("Device name: " + GetConfigValue(arguments, "DeviceName"));
+			Console.WriteLine("Port name: " + serialPortName);
 
 			var deviceTopic = "/" + deviceName;
 
 			if (useTopicPrefix)
 				deviceTopic = topicPrefix + deviceTopic;
 
-			Console.WriteLine (deviceTopic + "/[Key]");
+			Console.WriteLine(deviceTopic + "/[Key]");
 
-			if (port == null) {
-				Console.WriteLine ("Error: Device port not found.");
-			} else {
-				Console.WriteLine ("Serial port: " + port.PortName);
+			if (port == null)
+			{
+				Console.WriteLine("Error: Device port not found.");
+			}
+			else
+			{
+				Console.WriteLine("Serial port: " + port.PortName);
 
-				Client = new SerialClient (port);
+				Client = new SerialClient(port);
 
-				try {
+				try
+				{
 
 					if (!Client.Port.IsOpen)
-						Client.Open ();	
-					
+						Client.Open();
+
 					//Thread.Sleep(100);
-					var output = Client.Read ();
+					var output = Client.Read();
 					Console.WriteLine(output);
 					//Thread.Sleep(100);
 					//Client.Close();
@@ -85,35 +96,36 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 
 					var mqttClient = new MqttClient(host);
 
-					var clientId = Guid.NewGuid ().ToString ();
+					var clientId = Guid.NewGuid().ToString();
 
 					mqttClient.MqttMsgPublishReceived += client_MqttMsgPublishReceived;
-					mqttClient.Connect (clientId, userId, pass);
+					mqttClient.Connect(clientId, userId, pass);
 
 					var subscribeTopics = GetSubscribeTopics(arguments);
 					foreach (var topic in subscribeTopics)
 					{
-						mqttClient.Subscribe(new string[] {topic}, new byte[] { MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE });
+						mqttClient.Subscribe(new string[] { topic }, new byte[] { MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE });
 					}
-					
+
 					var assembly = System.Reflection.Assembly.GetExecutingAssembly();
 					var fvi = FileVersionInfo.GetVersionInfo(assembly.Location);
 					var version = fvi.FileVersion;
 
-					mqttClient.Publish ("/" + deviceName + "/bridge/version", Encoding.UTF8.GetBytes (version),
-	                	MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE, // QoS level
-	                	true);
+					mqttClient.Publish("/" + deviceName + "/bridge/version", Encoding.UTF8.GetBytes(version),
+						MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE, // QoS level
+						true);
 
-					while (isRunning) {
+					while (isRunning)
+					{
 
 						if (!Client.Port.IsOpen)
-							Client.Open ();	
-						
+							Client.Open();
+
 						//Thread.Sleep(100);
 						output = "";
 						while (!output.Contains(";;"))
-						{	
-							var value = Client.Read ();
+						{
+							var value = Client.Read();
 							if (!String.IsNullOrEmpty(value))
 								output += value;
 							Thread.Sleep(10);
@@ -128,20 +140,22 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 
 						var topics = new List<string>();
 
-						Publish (arguments, mqttClient, output, topics);
+						Publish(arguments, mqttClient, output, topics);
 
 						//Thread.Sleep(10);
 
 					}
 
-				} catch (Exception ex) {
-					Console.WriteLine ("Connection lost with: " + serialPortName);
+				}
+				catch (Exception ex)
+				{
+					Console.WriteLine("Connection lost with: " + serialPortName);
 					Console.WriteLine(ex.ToString());
-					Console.WriteLine ();
-					Console.WriteLine ("Waiting for 10 seconds then retrying");
+					Console.WriteLine();
+					Console.WriteLine("Waiting for 10 seconds then retrying");
 
-					Thread.Sleep (10000);
-					Run (arguments);
+					Thread.Sleep(10000);
+					Run(arguments);
 				}
 			}
 		}
@@ -150,77 +164,81 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 		{
 			var incomingLinePrefix = ConfigurationSettings.AppSettings["IncomingLinePrefix"];
 
-			var data = GetLastDataLine (output);
+			var data = GetLastDataLine(output);
 
-			if (!String.IsNullOrEmpty(data)) {
+			if (!String.IsNullOrEmpty(data))
+			{
 				//if (IsVerbose)
 				Console.WriteLine("----- Data");
-				Console.WriteLine (data);
-				Console.WriteLine ("-----");
+				Console.WriteLine(data);
+				Console.WriteLine("-----");
 				//else
 				//	Console.WriteLine (".");
 
 				var dividerCharacter = ConfigurationSettings.AppSettings["DividerSplitCharacter"].ToCharArray()[0];
 				var equalsCharacter = ConfigurationSettings.AppSettings["EqualsSplitCharacter"].ToCharArray()[0];
-				var userId = GetConfigValue (arguments, "UserId");
-				var deviceName = GetConfigValue (arguments, "DeviceName");
+				var userId = GetConfigValue(arguments, "UserId");
+				var deviceName = GetConfigValue(arguments, "DeviceName");
 				var topicPrefix = "/" + userId;
 				var useTopicPrefix = Convert.ToBoolean(ConfigurationSettings.AppSettings["UseTopicPrefix"]);
-				var summaryKey = GetConfigValue (arguments, "SummaryKey");
+				var summaryKey = GetConfigValue(arguments, "SummaryKey");
 
 				var deviceTopic = "/" + deviceName;
 
 				if (useTopicPrefix)
 					deviceTopic = topicPrefix + deviceTopic;
-					
+
 				var summaryValue = 0;
 
-				foreach (var item in data.Split(dividerCharacter)) {
-					var parts = item.Split (equalsCharacter);
-					if (parts.Length == 2) {
-						var key = parts [0];
-						var value = parts [1];
+				foreach (var item in data.Split(dividerCharacter))
+				{
+					var parts = item.Split(equalsCharacter);
+					if (parts.Length == 2)
+					{
+						var key = parts[0];
+						var value = parts[1];
 
-						if (!String.IsNullOrEmpty (value)) {
+						if (!String.IsNullOrEmpty(value))
+						{
 							if (key == summaryKey)
 								summaryValue = Convert.ToInt32(value);
-							
+
 							var fullTopic = deviceTopic + "/" + key;
 
 							if (IsVerbose)
-								Console.WriteLine (fullTopic + ":" + value);
+								Console.WriteLine(fullTopic + ":" + value);
 
-							if (!topics.Contains (fullTopic))
-								topics.Add (fullTopic);
+							if (!topics.Contains(fullTopic))
+								topics.Add(fullTopic);
 
-							client.Publish (fullTopic, Encoding.UTF8.GetBytes (value),
-			                	MqttMsgBase.QOS_LEVEL_AT_LEAST_ONCE, // QoS level
-			                	true);
+							client.Publish(fullTopic, Encoding.UTF8.GetBytes(value),
+								MqttMsgBase.QOS_LEVEL_AT_LEAST_ONCE, // QoS level
+								true);
 						}
 					}
 				}
 
 				var timeTopic = deviceTopic + "/Time";
 
-				var time = DateTime.Now.ToString ("MM/dd/yyyy HH:mm:ss");
+				var time = DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss");
 
 				if (IsVerbose)
-					Console.WriteLine (timeTopic + ":" + time);
+					Console.WriteLine(timeTopic + ":" + time);
 
-				client.Publish (timeTopic, Encoding.UTF8.GetBytes (time),
-                	MqttMsgBase.QOS_LEVEL_AT_LEAST_ONCE, // QoS level
-                	true);
+				client.Publish(timeTopic, Encoding.UTF8.GetBytes(time),
+					MqttMsgBase.QOS_LEVEL_AT_LEAST_ONCE, // QoS level
+					true);
 
 				var pushNotificationTopic = "/push/" + deviceName;
 
 				if (IsVerbose)
-					Console.WriteLine (pushNotificationTopic + ":" + deviceName + ":" + summaryValue);
-					
+					Console.WriteLine(pushNotificationTopic + ":" + deviceName + ":" + summaryValue);
+
 				var pushSummary = deviceName + ":" + summaryValue;
 
-				client.Publish (pushNotificationTopic, Encoding.UTF8.GetBytes (pushSummary),
-                	MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE, // QoS level
-                	false);
+				client.Publish(pushNotificationTopic, Encoding.UTF8.GetBytes(pushSummary),
+					MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE, // QoS level
+					false);
 			}
 		}
 
@@ -228,43 +246,45 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 		public static void client_MqttMsgPublishReceived(object sender, MqttMsgPublishEventArgs e)
 		{
 			var topic = e.Topic;
-			var topicSections = topic.Split ('/');
-			var subTopic = topicSections [topicSections.Length - 2];
+			var topicSections = topic.Split('/');
+			var subTopic = topicSections[topicSections.Length - 2];
 
 			if (IsVerbose)
-				Console.WriteLine ("Subtopic: " + subTopic);
+				Console.WriteLine("Subtopic: " + subTopic);
 
 			var message = System.Text.Encoding.Default.GetString(e.Message);
 
 			if (IsVerbose)
 				Console.WriteLine("Message received: " + message);
 
-			Console.WriteLine(subTopic + message);
-			
-			SendMessageToDevice(subTopic + message);
+			var serialCommand = subTopic + IncomingKeyValueSeparator + message;
+
+			Console.WriteLine(serialCommand);
+
+			SendMessageToDevice(serialCommand);
 		}
-		
+
 		public static void SendMessageToDevice(string message)
 		{
 			try
 			{
 				if (!Client.Port.IsOpen)
-					Client.Open ();	
-				
-				Client.WriteLine (message);
+					Client.Open();
+
+				Client.WriteLine(message);
 
 				//Client.Close();
 			}
 			catch (Exception ex)
 			{
-				Console.WriteLine ("Failed to send message to device");
+				Console.WriteLine("Failed to send message to device");
 				Console.WriteLine(ex.ToString());
-				Console.WriteLine ();
-				Console.WriteLine ("Waiting for 10 seconds then retrying");
+				Console.WriteLine();
+				Console.WriteLine("Waiting for 10 seconds then retrying");
 
-				Thread.Sleep (10000);
+				Thread.Sleep(10000);
 
-				SendMessageToDevice (message);
+				SendMessageToDevice(message);
 			}
 		}
 
@@ -273,24 +293,29 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 			var value = String.Empty;
 
 			if (IsVerbose)
-				Console.WriteLine ("Getting config/argument value for: " + argumentKey);
+				Console.WriteLine("Getting config/argument value for: " + argumentKey);
 
-			if (arguments.Contains (argumentKey)) {
-				value = arguments [argumentKey];
+			if (arguments.Contains(argumentKey))
+			{
+				value = arguments[argumentKey];
 				if (IsVerbose)
-					Console.WriteLine ("Found in arguments");
-			} else {
+					Console.WriteLine("Found in arguments");
+			}
+			else
+			{
 
-				try{
-					value = ConfigurationManager.AppSettings [argumentKey];
+				try
+				{
+					value = ConfigurationManager.AppSettings[argumentKey];
 				}
-				catch (Exception ex) {
+				catch (Exception ex)
+				{
 					Console.WriteLine("Failed to get configuration value: " + argumentKey);
 					throw ex;
 				}
 
 				if (IsVerbose)
-					Console.WriteLine ("Looking in config");
+					Console.WriteLine("Looking in config");
 			}
 
 			return value;
@@ -298,44 +323,51 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 
 		public static string[] GetSubscribeTopics(Arguments arguments)
 		{
-			var topics = GetConfigValue (arguments, "SubscribeTopics").Split (',');
-			var userId = GetConfigValue (arguments, "UserId");
-			var deviceName = GetConfigValue (arguments, "DeviceName");
+			var topics = GetConfigValue(arguments, "SubscribeTopics").Split(',');
+			var userId = GetConfigValue(arguments, "UserId");
+			var deviceName = GetConfigValue(arguments, "DeviceName");
 			var topicPrefix = "/" + userId;
 			var useTopicPrefix = Convert.ToBoolean(ConfigurationSettings.AppSettings["UseTopicPrefix"]);
 
 
-			var list = new List<String> ();
+			var list = new List<String>();
 
-			foreach (var topic in topics) {
+			foreach (var topic in topics)
+			{
 				var fullTopic = "/" + deviceName + "/" + topic + "/in";
 
 				if (useTopicPrefix)
 					fullTopic = topicPrefix + fullTopic;
 
-				list.Add (fullTopic);
+				list.Add(fullTopic);
 			}
 
-			return list.ToArray ();
+			return list.ToArray();
 		}
-		
+
 		public static Dictionary<string, int> ParseOutputLine(string outputLine)
 		{
-			var dictionary = new Dictionary<string, int> ();
+			var dictionary = new Dictionary<string, int>();
 
-			if (IsValidOutputLine (outputLine)) {
-				foreach (var pair in outputLine.Split(';')) {
-					var parts = pair.Split (':');
+			if (IsValidOutputLine(outputLine))
+			{
+				foreach (var pair in outputLine.Split(';'))
+				{
+					var parts = pair.Split(':');
 
-					if (parts.Length == 2) {
-						var key = parts [0];
+					if (parts.Length == 2)
+					{
+						var key = parts[0];
 						var value = 0;
-						try {
-							value = Convert.ToInt32 (parts [1]);
+						try
+						{
+							value = Convert.ToInt32(parts[1]);
 
-							dictionary [key] = value;
-						} catch {
-							Console.WriteLine ("Warning: Invalid key/value pair '" + pair + "'");
+							dictionary[key] = value;
+						}
+						catch
+						{
+							Console.WriteLine("Warning: Invalid key/value pair '" + pair + "'");
 						}
 					}
 				}
@@ -346,10 +378,11 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 
 		public static string GetLastDataLine(string output)
 		{
-			var lines = output.Split ('\n');
+			var lines = output.Split('\n');
 
-			for (int i = lines.Length - 1; i >= 0; i--) {
-				var line = lines [i].Trim();
+			for (int i = lines.Length - 1; i >= 0; i--)
+			{
+				var line = lines[i].Trim();
 				if (IsValidOutputLine(line))
 					return line;
 			}
