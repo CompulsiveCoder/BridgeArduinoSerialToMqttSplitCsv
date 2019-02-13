@@ -1,5 +1,11 @@
 #!/bin/bash
+
 BRANCH=$(git branch | sed -n -e 's/^\* \(.*\)/\1/p')
 
-git commit buildnumber.txt -m "Updated version [skip ci]"
-git push origin $BRANCH --quiet
+if [ "$BRANCH" = "dev" ];  then
+
+  git commit buildnumber.txt -m "Updated version [ci skip]" && \
+  git push origin $BRANCH --quiet
+else
+  echo "Skipping push version. Only pushed for 'dev' branch not '$BRANCH'"
+fi
