@@ -1,6 +1,6 @@
 DIR=$PWD
 
-cd sketch/ExampleSketch
+cd sketches/ExampleSketch
 sh upload-uno.sh
 
 cd $DIR
