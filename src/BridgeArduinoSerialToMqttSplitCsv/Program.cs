@@ -45,6 +45,9 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 			var useTopicPrefix = Convert.ToBoolean(ConfigurationSettings.AppSettings["UseTopicPrefix"]);
 			IncomingKeyValueSeparator = GetConfigValue(arguments, "IncomingKeyValueSeparator");
 
+			if (mqttPort == 0)
+				mqttPort = 1883;
+
 			Console.WriteLine ("Host: " + host);
 			Console.WriteLine ("UserId: " + userId);
 			Console.WriteLine ("Port: " + mqttPort);
