@@ -50,7 +50,7 @@ namespace BridgeArduinoSerialToMqttSplitCsv.Tests.Integration
 			var exeFile = Path.Combine (binDir, "BridgeArduinoSerialToMqttSplitCsv.exe");
 
 			// Assemble the MQTT bridge command
-			var cmd = String.Format("timeout 3s mono {0} --Host={1} --UserId={2} --Password={3} --MqttPort={4} --DeviceName={5} --SerialPort={6} --SubscribeTopics=V --SummaryKey=V",
+			var cmd = String.Format("timeout 5s mono {0} --Host={1} --UserId={2} --Password={3} --MqttPort={4} --DeviceName={5} --SerialPort={6} --SubscribeTopics=V --SummaryKey=V",
 				exeFile,
 				Mqtt.Host, Mqtt.UserId, Mqtt.Password, Mqtt.Port,
 				DeviceName, DevicePort);
