@@ -1,1 +1,5 @@
-# Not yet implemented
+DIR=$PWD
+
+sh test-all.sh
+
+cd $DIR

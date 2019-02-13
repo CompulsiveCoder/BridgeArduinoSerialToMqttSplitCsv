@@ -37,6 +37,7 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 			var userId = GetConfigValue(arguments, "UserId");
 			var pass = GetConfigValue(arguments, "Password");
 			var host = GetConfigValue(arguments, "Host");
+			var mqttPort = Convert.ToInt32(GetConfigValue(arguments, "MqttPort"));
 			var deviceName = GetConfigValue(arguments, "DeviceName");
 			var serialPortName = GetConfigValue(arguments, "SerialPort");
 			var serialBaudRate = Convert.ToInt32(GetConfigValue(arguments, "SerialBaudRate"));
@@ -44,6 +45,10 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 			var useTopicPrefix = Convert.ToBoolean(ConfigurationSettings.AppSettings["UseTopicPrefix"]);
 			IncomingKeyValueSeparator = GetConfigValue(arguments, "IncomingKeyValueSeparator");
 
+			Console.WriteLine ("Host: " + host);
+			Console.WriteLine ("UserId: " + userId);
+			Console.WriteLine ("Port: " + mqttPort);
+			//Console.WriteLine ("Host: " + host);
 
 			SerialPort port = null;
 
@@ -61,7 +66,7 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 			}
 
 			Console.WriteLine("Device name: " + GetConfigValue(arguments, "DeviceName"));
-			Console.WriteLine("Port name: " + serialPortName);
+			Console.WriteLine("Serial port name: " + serialPortName);
 
 			var deviceTopic = "/" + deviceName;
 
@@ -94,7 +99,7 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 
 					var isRunning = true;
 
-					var mqttClient = new MqttClient(host);
+					var mqttClient = new MqttClient(host, mqttPort, false, null, null, MqttSslProtocols.None);
 
 					var clientId = Guid.NewGuid().ToString();
 
