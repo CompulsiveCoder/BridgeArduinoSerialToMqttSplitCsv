@@ -4,5 +4,5 @@ echo "Initializing project"
 echo "Dir: $PWD"
 
 cd lib
-sh getlibs.sh
+sh get-libs.sh
 cd $DIR
