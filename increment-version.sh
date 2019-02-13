@@ -2,12 +2,13 @@
 
 echo "Incrementing version"
 
-CURRENT_VERSION=$(cat buildnumber.txt)
+CURRENT_VERSION=$(cat version.txt)
+CURRENT_BUILD=$(cat buildnumber.txt)
 
-echo "Current: $CURRENT_VERSION"
+echo "Current: $CURRENT_VERSION.$CURRENT_BUILD"
 
-CURRENT_VERSION=$(($CURRENT_VERSION + 1))
+CURRENT_BUILD=$(($CURRENT_BUILD + 1))
 
-echo "New version: $CURRENT_VERSION"
+echo "New version: $CURRENT_VERSION.$CURRENT_BUILD"
 
-echo $CURRENT_VERSION > buildnumber.txt
+echo $CURRENT_BUILD > buildnumber.txt
