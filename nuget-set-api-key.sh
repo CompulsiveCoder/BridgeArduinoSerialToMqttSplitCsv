@@ -4,4 +4,4 @@ cd lib
 sh get-nuget.sh
 cd $DIR
 
-mono lib/nuget.exe setApiKey $1
+mono lib/nuget.exe setApiKey -verbosity quiet $1

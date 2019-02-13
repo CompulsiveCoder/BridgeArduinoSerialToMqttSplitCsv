@@ -40,13 +40,13 @@ pipeline {
         stage('Upload') {
             when { expression { !shouldSkipBuild() } }
             steps {
-                sh 'echo "Skipped" #sh upload-example-sketch-uno.sh'
+                sh 'sh upload-example-sketch-uno.sh'
             }
         }
         stage('Test') {
             when { expression { !shouldSkipBuild() } }
             steps {
-                sh 'echo "Skipped" #sh test-all.sh'
+                sh 'sh test-all.sh'
             }
         }
         stage('Clean') {
