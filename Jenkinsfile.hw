@@ -73,6 +73,12 @@ pipeline {
                 sh 'sh push-version.sh'
             }
         } 
+        stage('Nuget Pack and Push') {
+            when { expression { !shouldSkipBuild() } }
+            steps {
+                sh 'sh nuget-pack-and-push.sh'
+            }
+        } 
     }
     post {
         success() {
