@@ -1,3 +1,5 @@
+DIR=$PWD
+
 mkdir -p pkg
 mkdir -p pkg/archive
 
@@ -20,5 +22,9 @@ if [ "$BRANCH" = "dev" ]
 then
     FULL_VERSION="$FULL_VERSION-dev"
 fi
+
+cd lib
+sh get-nuget.sh
+cd $DIR
 
 mono lib/nuget.exe pack Package.nuspec -version $FULL_VERSION -OutputDirectory pkg/

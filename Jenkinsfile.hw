@@ -55,6 +55,13 @@ pipeline {
                 sh 'sh clean.sh'
             }
         }
+        stage('Nuget Pack and Push') {
+            when { expression { !shouldSkipBuild() } }
+            steps {
+                sh 'sh nuget-set-api-key.sh ${NUGETTOKEN}'
+                sh 'sh nuget-pack-and-push.sh'
+            }
+        } 
         stage('Graduate') {
             when { expression { !shouldSkipBuild() } }
             steps {
@@ -71,13 +78,6 @@ pipeline {
             when { expression { !shouldSkipBuild() } }
             steps {
                 sh 'sh push-version.sh'
-            }
-        } 
-        stage('Nuget Pack and Push') {
-            when { expression { !shouldSkipBuild() } }
-            steps {
-                sh 'sh nuget-set-api-key.sh ${NUGETTOKEN}'
-                sh 'sh nuget-pack-and-push.sh'
             }
         } 
     }
