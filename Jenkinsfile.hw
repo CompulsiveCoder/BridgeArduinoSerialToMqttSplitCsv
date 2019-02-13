@@ -30,6 +30,12 @@ pipeline {
                 sh 'sh inject-version.sh'
             }
         }
+        stage('Build') {
+            when { expression { !shouldSkipBuild() } }
+            steps {
+                sh 'sh build.sh'
+            }
+        }
         stage('Upload') {
             when { expression { !shouldSkipBuild() } }
             steps {
