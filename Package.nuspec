@@ -7,7 +7,7 @@
     <owners>compulsivecoder</owners>
     <projectUrl>https://github.com/CompulsiveCoder/BridgeArduinoSerialToMqttSplitCsv</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>A service for broadcasting arduino serial data to an MQTT broker.</description>
+    <description>A service for sending arduino serial data to an MQTT broker, and returning commands from the broker back to the arduino serial port.</description>
     <copyright>Copyright 2017</copyright>
     <tags>arduino</tags>
   </metadata>

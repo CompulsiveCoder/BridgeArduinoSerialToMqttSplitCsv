@@ -55,8 +55,9 @@ namespace BridgeArduinoSerialToMqttSplitCsv.Tests.Integration
 				Mqtt.Host, Mqtt.UserId, Mqtt.Password, Mqtt.Port,
 				DeviceName, DevicePort);
 
-			Console.WriteLine ("MQTT bridge command:");
-			Console.WriteLine (cmd);
+			// This is disabled because it would output the password to the log which isn't a good idea outside a local workstation
+			//Console.WriteLine ("MQTT bridge command:");
+			//Console.WriteLine (cmd);
 
 			Console.WriteLine("Random number value: " + randomNumber);
 
