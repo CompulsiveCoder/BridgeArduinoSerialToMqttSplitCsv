@@ -7,11 +7,12 @@ mv -f pkg/*.nupkg pkg/archive
 
 BRANCH=$(git branch | sed -n -e 's/^\* \(.*\)/\1/p')
 
-if [ "$BRANCH" = "dev" ]
-then    
+# TODO: Remove if not needed. Disabled because version increment is triggered in jenkinsfile
+#if [ "$BRANCH" = "dev" ]
+#then    
     # Only increment version during dev builds. The dev version can be used when graduated to the master branch
-    sh increment-version.sh
-fi
+#    sh increment-version.sh
+#fi
 
 VERSION=$(cat version.txt)
 BUILD_NUMBER=$(cat buildnumber.txt)
