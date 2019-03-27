@@ -25,6 +25,8 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 
         public static string IncomingKeyValueSeparator = "";
 
+        public static int WaitTimeBeforeRetry = 120;
+
         public static void Main (string[] args)
         {
             var arguments = new Arguments (args);
@@ -46,6 +48,10 @@ namespace BridgeArduinoSerialToMqttSplitCsv
             var useTopicPrefix = Convert.ToBoolean (ConfigurationSettings.AppSettings ["UseTopicPrefix"]);
             IncomingKeyValueSeparator = GetConfigValue (arguments, "IncomingKeyValueSeparator");
 
+            var waitTimeBeforeRetryString = GetConfigValue (arguments, "WaitTimeBeforeRetry");
+            if (!String.IsNullOrEmpty (waitTimeBeforeRetryString))
+                Int32.TryParse (waitTimeBeforeRetryString, out WaitTimeBeforeRetry);
+
             var emailAddress = GetConfigValue (arguments, "EmailAddress");
             var smtpServer = GetConfigValue (arguments, "SmtpServer");
 
@@ -55,6 +61,7 @@ namespace BridgeArduinoSerialToMqttSplitCsv
             Console.WriteLine ("Host: " + host);
             Console.WriteLine ("UserId: " + userId);
             Console.WriteLine ("Port: " + mqttPort);
+            Console.WriteLine ("Wait time before retry: " + WaitTimeBeforeRetry + " seconds");
             //Console.WriteLine ("Host: " + host);
 
             SerialPort port = null;
@@ -310,9 +317,9 @@ namespace BridgeArduinoSerialToMqttSplitCsv
                 Console.WriteLine ("Failed to send message to device");
                 Console.WriteLine (ex.ToString ());
                 Console.WriteLine ();
-                Console.WriteLine ("Waiting for 10 seconds then retrying");
+                Console.WriteLine ("Waiting for " + WaitTimeBeforeRetry + " seconds then retrying");
 
-                Thread.Sleep (10000);
+                Thread.Sleep (WaitTimeBeforeRetry * 1000);
 
                 SendMessageToDevice (message);
             }
