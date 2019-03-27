@@ -23,4 +23,4 @@ echo "Package file: $PACKAGE_FILE"
 
 wget -q "https://github.com/GreenSense/libs/raw/master/$PACKAGE_FILE.nupkg" -O $PACKAGE_FILE_EXT
 
-unzip -o "$PACKAGE_FILE_EXT" -d "$PACKAGE_FILE/"
+unzip -q -o "$PACKAGE_FILE_EXT" -d "$PACKAGE_FILE/"
