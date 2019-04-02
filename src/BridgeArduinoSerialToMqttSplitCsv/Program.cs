@@ -174,8 +174,8 @@ namespace BridgeArduinoSerialToMqttSplitCsv
         {
             var areDetailsProvided = (smtpServer != "mail.example.com" &&
                                      emailAddress != "user@example.com" &&
-                                     SmtpServer.ToLower () != "na" &&
-                                     EmailAddress.ToLower () != "na" &&
+                                     smtpServer.ToLower () != "na" &&
+                                     emailAddress.ToLower () != "na" &&
                                      !String.IsNullOrWhiteSpace (smtpServer) &&
                                      !String.IsNullOrWhiteSpace (emailAddress));
 
