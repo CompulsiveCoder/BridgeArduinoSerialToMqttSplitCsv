@@ -161,16 +161,14 @@ namespace BridgeArduinoSerialToMqttSplitCsv
                     Console.WriteLine ();
                     Console.WriteLine ("Waiting for 30 seconds then retrying");
 
-                    SendErrorEmail (ex, deviceName, smtpServer, emailAddress);
+                    SendErrorEmail (ex, deviceName, serialPortName, smtpServer, emailAddress);
 
                     Thread.Sleep (30 * 1000);
-
-                    Run (arguments);
                 }
             }
         }
 
-        public static void SendErrorEmail (Exception error, string deviceName, string smtpServer, string emailAddress)
+        public static void SendErrorEmail (Exception error, string deviceName, string portName, string smtpServer, string emailAddress)
         {
             var areDetailsProvided = (smtpServer != "mail.example.com" &&
                                      emailAddress != "user@example.com" &&
@@ -181,8 +179,12 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 
             if (areDetailsProvided) {
                 try {
+                    var notes = String.Empty;
+                    if (error.Message = "Input/output error")
+                        notes = "The device was likely disconnected. If it was intentionally disconnected then you can ignore this error. If it wasn't intentionally disconnected then it may be malfunctioning.\n\n";
+
                     var subject = "Error: MQTT bridge for device '" + deviceName + "'";
-                    var body = "The following error was thrown by the MQTT bridge utility...\n\nDevice name: " + deviceName + "\n\n" + error.ToString ();
+                    var body = "The following error was thrown by the MQTT bridge utility...\n\nDevice name: " + deviceName + "Port name:" + portName + "\n\n" + notes + error.ToString ();
 
                     var mail = new MailMessage (emailAddress, emailAddress, subject, body);
 
