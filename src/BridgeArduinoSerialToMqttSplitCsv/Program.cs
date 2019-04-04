@@ -180,7 +180,7 @@ namespace BridgeArduinoSerialToMqttSplitCsv
             if (areDetailsProvided) {
                 try {
                     var notes = String.Empty;
-                    if (error.Message = "Input/output error")
+                    if (error.Message == "Input/output error")
                         notes = "The device was likely disconnected. If it was intentionally disconnected then you can ignore this error. If it wasn't intentionally disconnected then it may be malfunctioning.\n\n";
 
                     var subject = "Error: MQTT bridge for device '" + deviceName + "'";
