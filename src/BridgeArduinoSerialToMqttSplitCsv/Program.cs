@@ -184,7 +184,7 @@ namespace BridgeArduinoSerialToMqttSplitCsv
                         notes = "The device was likely disconnected. If it was intentionally disconnected then you can ignore this error. If it wasn't intentionally disconnected then it may be malfunctioning.\n\n";
 
                     var subject = "Error: MQTT bridge for device '" + deviceName + "'";
-                    var body = "The following error was thrown by the MQTT bridge utility...\n\nDevice name: " + deviceName + "Port name:" + portName + "\n\n" + notes + error.ToString ();
+                    var body = "The following error was thrown by the MQTT bridge utility...\n\nDevice name: " + deviceName + "\n\nPort name:" + portName + "\n\n" + notes + error.ToString ();
 
                     var mail = new MailMessage (emailAddress, emailAddress, subject, body);
 
