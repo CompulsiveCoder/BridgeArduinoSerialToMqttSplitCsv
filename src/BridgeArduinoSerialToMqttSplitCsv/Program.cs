@@ -239,7 +239,8 @@ namespace BridgeArduinoSerialToMqttSplitCsv
                 if (useTopicPrefix)
                     deviceTopic = topicPrefix + deviceTopic;
 
-                var summaryValue = 0;
+                // TODO: Remove if not needed. Should be obsolete now.
+                var summaryValue = "";
 
                 foreach (var item in data.Split(dividerCharacter)) {
                     var parts = item.Split (equalsCharacter);
@@ -249,7 +250,7 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 
                         if (!String.IsNullOrEmpty (value)) {
                             if (key == summaryKey)
-                                summaryValue = Convert.ToInt32 (value);
+                                summaryValue = value;
 
                             var fullTopic = deviceTopic + "/" + key;
 
@@ -277,7 +278,9 @@ namespace BridgeArduinoSerialToMqttSplitCsv
                     MqttMsgBase.QOS_LEVEL_AT_LEAST_ONCE, // QoS level
                     true);
 
-                var pushNotificationTopic = "/push/" + deviceName;
+                // TODO: Remove if not needed. This triggers push notifications which should
+                // be used for alerts not just for data
+                /*var pushNotificationTopic = "/push/" + deviceName;
 
                 if (IsVerbose)
                     Console.WriteLine (pushNotificationTopic + ":" + deviceName + ":" + summaryValue);
@@ -286,7 +289,7 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 
                 client.Publish (pushNotificationTopic, Encoding.UTF8.GetBytes (pushSummary),
                     MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE, // QoS level
-                    false);
+                    false);*/
             }
         }
 
