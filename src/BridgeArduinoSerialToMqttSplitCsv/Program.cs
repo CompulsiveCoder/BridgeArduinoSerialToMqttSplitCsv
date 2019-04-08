@@ -27,6 +27,8 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 
         public static int WaitTimeBeforeRetry = 120;
 
+        public static string SelfHostName = String.Empty;
+
         public static void Main (string[] args)
         {
             var arguments = new Arguments (args);
@@ -36,6 +38,8 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 
         public static void Run (Arguments arguments)
         {
+            SelfHostName = GetSelfHostName ();
+
             IsVerbose = arguments.Contains ("v");
             var userId = GetConfigValue (arguments, "UserId");
             var pass = GetConfigValue (arguments, "Password");
@@ -183,8 +187,8 @@ namespace BridgeArduinoSerialToMqttSplitCsv
                     if (error.Message == "Input/output error")
                         notes = "The device was likely disconnected. If it was intentionally disconnected then you can ignore this error. If it wasn't intentionally disconnected then it may be malfunctioning.\n\n";
 
-                    var subject = "Error: MQTT bridge for device '" + deviceName + "'";
-                    var body = "The following error was thrown by the MQTT bridge utility...\n\nDevice name: " + deviceName + "\n\nPort name:" + portName + "\n\n" + notes + error.ToString ();
+                    var subject = "Error: MQTT bridge for device '" + deviceName + "' on '" + SelfHostName + "'";
+                    var body = "The following error was thrown by the MQTT bridge utility...\n\nSource host: " + SelfHostName + "\n\nDevice name: " + deviceName + "\n\nPort name:" + portName + "\n\n" + notes + error.ToString ();
 
                     var mail = new MailMessage (emailAddress, emailAddress, subject, body);
 
@@ -427,5 +431,22 @@ namespace BridgeArduinoSerialToMqttSplitCsv
             && outputLine.EndsWith (dataPostFix);
         }
 
+        public static string GetSelfHostName ()
+        {
+            var starter = new ProcessStarter ();
+
+            starter.WriteOutputToConsole = false;
+
+            starter.Start ("hostname");
+
+            var selfHostName = "";
+            if (!starter.IsError) {
+                selfHostName = starter.Output.Trim ();
+            }
+
+            Console.WriteLine ("Self: " + selfHostName);
+
+            return selfHostName;
+        }
     }
 }
