@@ -99,11 +99,12 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 
                 try {
 
-                    if (!Client.Port.IsOpen)
+                    if (!Client.Port.IsOpen) {
                         Client.Open ();
 
-                    //Thread.Sleep(100);
-                    var output = Client.Read ();
+                        Thread.Sleep (100);
+                    }
+                    var output = Client.ReadLine ();
                     Console.WriteLine (output);
                     //Thread.Sleep(100);
                     //Client.Close();
@@ -132,15 +133,16 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 
                     while (isRunning) {
 
-                        if (!Client.Port.IsOpen)
+                        if (!Client.Port.IsOpen) {
                             Client.Open ();
 
-                        //Thread.Sleep(100);
+                            Thread.Sleep (100);
+                        }
                         output = "";
-                        while (!output.Contains (";;")) {
-                            var value = Client.Read ();
+                        while (!output.Contains ("D;") || !output.Contains (";;")) {
+                            var value = Client.ReadLine ();
                             if (!String.IsNullOrEmpty (value))
-                                output += value;
+                                output += value + "\n";
                             Thread.Sleep (10);
                         }
 
@@ -406,7 +408,7 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 
         public static string GetLastDataLine (string output)
         {
-            var lines = output.Split ('\n');
+            var lines = output.Trim ().Split ('\n');
 
             for (int i = lines.Length - 1; i >= 0; i--) {
                 var line = lines [i].Trim ();
