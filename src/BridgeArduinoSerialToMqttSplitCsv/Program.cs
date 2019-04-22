@@ -156,22 +156,22 @@ namespace BridgeArduinoSerialToMqttSplitCsv
         {
             while (!IsMqttConnected) {
                 try {
-                    var mqttClient = new MqttClient (mqttHost, mqttPort, false, null, null, MqttSslProtocols.None);
+                    MqttClient = new MqttClient (mqttHost, mqttPort, false, null, null, MqttSslProtocols.None);
 
                     var clientId = Guid.NewGuid ().ToString ();
 
-                    mqttClient.MqttMsgPublishReceived += client_MqttMsgPublishReceived;
-                    mqttClient.Connect (clientId, mqttUsername, mqttPassword);
+                    MqttClient.MqttMsgPublishReceived += client_MqttMsgPublishReceived;
+                    MqttClient.Connect (clientId, mqttUsername, mqttPassword);
 
                     foreach (var topic in subscribeTopics) {
-                        mqttClient.Subscribe (new string[] { topic }, new byte[] { MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE });
+                        MqttClient.Subscribe (new string[] { topic }, new byte[] { MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE });
                     }
 
                     var assembly = System.Reflection.Assembly.GetExecutingAssembly ();
                     var fvi = FileVersionInfo.GetVersionInfo (assembly.Location);
                     var version = fvi.FileVersion;
 
-                    mqttClient.Publish ("/" + deviceName + "/bridge/version", Encoding.UTF8.GetBytes (version),
+                    MqttClient.Publish ("/" + deviceName + "/bridge/version", Encoding.UTF8.GetBytes (version),
                         MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE, // QoS level
                         true);
 
