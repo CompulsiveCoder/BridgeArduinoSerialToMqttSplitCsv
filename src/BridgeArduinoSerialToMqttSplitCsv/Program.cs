@@ -29,6 +29,10 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 
         public static string SelfHostName = String.Empty;
 
+        public static MqttClient MqttClient = null;
+
+        public static bool IsMqttConnected = false;
+
         public static void Main (string[] args)
         {
             var arguments = new Arguments (args);
@@ -68,17 +72,7 @@ namespace BridgeArduinoSerialToMqttSplitCsv
             Console.WriteLine ("Wait time before retry: " + WaitTimeBeforeRetry + " seconds");
             //Console.WriteLine ("Host: " + host);
 
-            SerialPort port = null;
-
-            if (String.IsNullOrEmpty (serialPortName)) {
-                Console.WriteLine ("Serial port not specified. Detecting.");
-                var detector = new SerialPortDetector ();
-                port = detector.Detect ();
-                serialPortName = port.PortName;
-            } else {
-                Console.WriteLine ("Serial port specified");
-                port = new SerialPort (serialPortName, serialBaudRate);
-            }
+            SerialPort port = GetDevicePort (serialPortName, serialBaudRate);
 
             Console.WriteLine ("Device name: " + GetConfigValue (arguments, "DeviceName"));
             Console.WriteLine ("Serial port name: " + serialPortName);
@@ -111,25 +105,9 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 
                     var isRunning = true;
 
-                    var mqttClient = new MqttClient (host, mqttPort, false, null, null, MqttSslProtocols.None);
-
-                    var clientId = Guid.NewGuid ().ToString ();
-
-                    mqttClient.MqttMsgPublishReceived += client_MqttMsgPublishReceived;
-                    mqttClient.Connect (clientId, userId, pass);
-
                     var subscribeTopics = GetSubscribeTopics (arguments);
-                    foreach (var topic in subscribeTopics) {
-                        mqttClient.Subscribe (new string[] { topic }, new byte[] { MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE });
-                    }
 
-                    var assembly = System.Reflection.Assembly.GetExecutingAssembly ();
-                    var fvi = FileVersionInfo.GetVersionInfo (assembly.Location);
-                    var version = fvi.FileVersion;
-
-                    mqttClient.Publish ("/" + deviceName + "/bridge/version", Encoding.UTF8.GetBytes (version),
-                        MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE, // QoS level
-                        true);
+                    SetupMQTT (host, userId, pass, mqttPort, deviceName, subscribeTopics);
 
                     while (isRunning) {
 
@@ -155,7 +133,7 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 
                         var topics = new List<string> ();
 
-                        Publish (arguments, mqttClient, output, topics);
+                        Publish (arguments, output, topics);
 
                         //Thread.Sleep(10);
 
@@ -172,6 +150,57 @@ namespace BridgeArduinoSerialToMqttSplitCsv
                     Thread.Sleep (30 * 1000);
                 }
             }
+        }
+
+        public static void SetupMQTT (string mqttHost, string mqttUsername, string mqttPassword, int mqttPort, string deviceName, string[] subscribeTopics)
+        {
+            while (!IsMqttConnected) {
+                try {
+                    var mqttClient = new MqttClient (mqttHost, mqttPort, false, null, null, MqttSslProtocols.None);
+
+                    var clientId = Guid.NewGuid ().ToString ();
+
+                    mqttClient.MqttMsgPublishReceived += client_MqttMsgPublishReceived;
+                    mqttClient.Connect (clientId, mqttUsername, mqttPassword);
+
+                    foreach (var topic in subscribeTopics) {
+                        mqttClient.Subscribe (new string[] { topic }, new byte[] { MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE });
+                    }
+
+                    var assembly = System.Reflection.Assembly.GetExecutingAssembly ();
+                    var fvi = FileVersionInfo.GetVersionInfo (assembly.Location);
+                    var version = fvi.FileVersion;
+
+                    mqttClient.Publish ("/" + deviceName + "/bridge/version", Encoding.UTF8.GetBytes (version),
+                        MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE, // QoS level
+                        true);
+
+                    IsMqttConnected = true;
+                } catch (Exception ex) {
+                    Console.WriteLine ("Failed to connect.");
+                    Console.WriteLine (ex.ToString ());
+
+                    Console.WriteLine ("Waiting for " + WaitTimeBeforeRetry + " seconds before retrying...");
+
+                    Thread.Sleep (WaitTimeBeforeRetry * 1000);
+                }
+            }
+        }
+
+        public static SerialPort GetDevicePort (string serialPortName, int serialBaudRate)
+        {
+            SerialPort port = null;
+            if (String.IsNullOrEmpty (serialPortName)) {
+                Console.WriteLine ("Serial port not specified. Detecting.");
+                var detector = new SerialPortDetector ();
+                port = detector.Detect ();
+                serialPortName = port.PortName;
+            } else {
+                Console.WriteLine ("Serial port specified");
+                port = new SerialPort (serialPortName, serialBaudRate);
+            }
+
+            return port;
         }
 
         public static void SendErrorEmail (Exception error, string deviceName, string portName, string smtpServer, string emailAddress)
@@ -214,7 +243,7 @@ namespace BridgeArduinoSerialToMqttSplitCsv
             }
         }
 
-        public static void Publish (Arguments arguments, MqttClient client, string output, List<string> topics)
+        public static void Publish (Arguments arguments, string output, List<string> topics)
         {
             var incomingLinePrefix = ConfigurationSettings.AppSettings ["IncomingLinePrefix"];
 
@@ -262,7 +291,7 @@ namespace BridgeArduinoSerialToMqttSplitCsv
                             if (!topics.Contains (fullTopic))
                                 topics.Add (fullTopic);
 
-                            client.Publish (fullTopic, Encoding.UTF8.GetBytes (value),
+                            MqttClient.Publish (fullTopic, Encoding.UTF8.GetBytes (value),
                                 MqttMsgBase.QOS_LEVEL_AT_LEAST_ONCE, // QoS level
                                 true);
                         }
@@ -276,8 +305,8 @@ namespace BridgeArduinoSerialToMqttSplitCsv
                 if (IsVerbose)
                     Console.WriteLine (timeTopic + ":" + time);
 
-                client.Publish (timeTopic, Encoding.UTF8.GetBytes (time),
-                    MqttMsgBase.QOS_LEVEL_AT_LEAST_ONCE, // QoS level
+                MqttClient.Publish (timeTopic, Encoding.UTF8.GetBytes (time),
+                    MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE, // QoS level
                     true);
 
                 // TODO: Remove if not needed. This triggers push notifications which should
