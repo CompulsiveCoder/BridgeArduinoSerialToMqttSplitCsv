@@ -25,7 +25,7 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 
         public static string IncomingKeyValueSeparator = "";
 
-        public static int WaitTimeBeforeRetry = 120;
+        public static int WaitTimeBeforeRetry = 10;
 
         public static string SelfHostName = String.Empty;
 
@@ -121,7 +121,7 @@ namespace BridgeArduinoSerialToMqttSplitCsv
                             var value = Client.ReadLine ();
                             if (!String.IsNullOrEmpty (value))
                                 output += value + "\n";
-                            Thread.Sleep (100);
+                            Thread.Sleep (500);
                         }
 
                         //Thread.Sleep(100);
@@ -144,11 +144,11 @@ namespace BridgeArduinoSerialToMqttSplitCsv
                     Console.WriteLine ("Connection lost with: " + serialPortName);
                     Console.WriteLine (ex.ToString ());
                     Console.WriteLine ();
-                    Console.WriteLine ("Waiting for 30 seconds then retrying");
+                    Console.WriteLine ("Waiting for " + WaitTimeBeforeRetry + " seconds then retrying");
 
                     SendErrorEmail (ex, deviceName, serialPortName, smtpServer, emailAddress);
 
-                    Thread.Sleep (30 * 1000);
+                    Thread.Sleep (WaitTimeBeforeRetry * 1000);
                 }
             }
         }
