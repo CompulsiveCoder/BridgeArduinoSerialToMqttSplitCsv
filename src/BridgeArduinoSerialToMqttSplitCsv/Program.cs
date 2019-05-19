@@ -135,9 +135,7 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 
                         Publish (arguments, output, topics);
 
-                        Thread.Sleep (500);
-                        //Thread.Sleep (300);
-
+                        Thread.Sleep (1000);
                     }
 
                 } catch (Exception ex) {
