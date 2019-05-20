@@ -25,7 +25,7 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 
         public static string IncomingKeyValueSeparator = "";
 
-        public static int WaitTimeBeforeRetry = 10;
+        public static int WaitTimeBeforeRetry = 3;
 
         public static string SelfHostName = String.Empty;
 
