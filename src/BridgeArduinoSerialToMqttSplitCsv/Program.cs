@@ -323,7 +323,6 @@ namespace BridgeArduinoSerialToMqttSplitCsv
             }
         }
 
-        // this code runs when a message was received
         public static void client_MqttMsgPublishReceived (object sender, MqttMsgPublishEventArgs e)
         {
             var topic = e.Topic;
@@ -340,7 +339,7 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 
             var serialCommand = subTopic + IncomingKeyValueSeparator + message;
 
-            Console.WriteLine (serialCommand);
+            Console.WriteLine ("Incoming command: " + serialCommand);
 
             SendMessageToDevice (serialCommand);
         }
