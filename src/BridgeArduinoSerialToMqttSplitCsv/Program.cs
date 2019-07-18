@@ -175,6 +175,8 @@ namespace BridgeArduinoSerialToMqttSplitCsv
                         true);
 
                     IsMqttConnected = true;
+                    
+                    Console.WriteLine("Connected to MQTT broker");
                 } catch (Exception ex) {
                     Console.WriteLine ("Failed to connect.");
                     Console.WriteLine (ex.ToString ());
