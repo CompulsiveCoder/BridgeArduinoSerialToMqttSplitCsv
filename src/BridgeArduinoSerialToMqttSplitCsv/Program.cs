@@ -96,7 +96,7 @@ namespace BridgeArduinoSerialToMqttSplitCsv
                     if (!Client.Port.IsOpen) {
                         Client.Open ();
 
-                        Thread.Sleep (100);
+                        Thread.Sleep (1000);
                     }
                     var output = Client.ReadLine ();
                     Console.WriteLine (output);
@@ -114,14 +114,14 @@ namespace BridgeArduinoSerialToMqttSplitCsv
                         if (!Client.Port.IsOpen) {
                             Client.Open ();
 
-                            Thread.Sleep (100);
+                            Thread.Sleep (1000);
                         }
                         output = "";
                         while (!output.Contains ("D;") || !output.Contains (";;")) {
                             var value = Client.ReadLine ();
                             if (!String.IsNullOrEmpty (value))
                                 output += value + "\n";
-                            Thread.Sleep (100);
+                            Thread.Sleep (1000);
                         }
 
                         //Thread.Sleep(100);
@@ -135,7 +135,7 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 
                         Publish (arguments, output, topics);
 
-                        Thread.Sleep (100);
+                        Thread.Sleep (1000);
                     }
 
                 } catch (Exception ex) {
@@ -176,7 +176,7 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 
                     IsMqttConnected = true;
                     
-                    Console.WriteLine("Connected to MQTT broker");
+                    Console.WriteLine ("Connected to MQTT broker");
                 } catch (Exception ex) {
                     Console.WriteLine ("Failed to connect.");
                     Console.WriteLine (ex.ToString ());
@@ -293,7 +293,7 @@ namespace BridgeArduinoSerialToMqttSplitCsv
                                 topics.Add (fullTopic);
 
                             MqttClient.Publish (fullTopic, Encoding.UTF8.GetBytes (value),
-                                MqttMsgBase.QOS_LEVEL_AT_LEAST_ONCE, // QoS level
+                                MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE, // QoS level
                                 true);
                         }
                     }
