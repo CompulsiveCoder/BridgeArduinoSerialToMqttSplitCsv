@@ -37,7 +37,7 @@ git merge -X theirs origin/master || exit 1
 
 echo ""
 echo "Pushing the updated lts branch to origin..."
-git push origin origin/lts || exit 1
+git push origin lts || exit 1
 
 echo ""
 echo "Checking out the $BRANCH branch again..."
