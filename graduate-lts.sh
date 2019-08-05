@@ -12,7 +12,7 @@ git fetch origin || exit 1
 
 if [ "$BRANCH" = "dev" ];  then
   echo "Currently in dev branch. Checking out master branch..."
-  git checkout master || exit 1
+  git checkout origin/master || exit 1
 fi
 
 #echo ""
@@ -21,11 +21,11 @@ fi
 
 echo ""
 echo "Merging the lts branch into the master branch..."
-git merge -X ours lts || exit 1
+git merge -X ours origin/lts || exit 1
 
 echo ""
 echo "Checking out the lts branch..."
-git checkout lts || exit 1
+git checkout origin/lts || exit 1
 
 #echo ""
 #echo "Pulling the lts branch from origin (to update it locally)..."
@@ -33,11 +33,11 @@ git checkout lts || exit 1
 
 echo ""
 echo "Merging the master branch into the lts branch..."
-git merge -X theirs master || exit 1
+git merge -X theirs origin/master || exit 1
 
 echo ""
 echo "Pushing the updated lts branch to origin..."
-git push origin lts || exit 1
+git push origin origin/lts || exit 1
 
 echo ""
 echo "Checking out the $BRANCH branch again..."
