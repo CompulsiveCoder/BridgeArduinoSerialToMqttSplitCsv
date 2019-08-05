@@ -10,18 +10,18 @@ echo ""
 echo "Fetching from origin..."
 git fetch origin || exit 1
 
-if [ "$BRANCH" = "dev" ];  then
-  echo "Currently in dev branch. Checking out master branch..."
-  git checkout origin/master || exit 1
-fi
+#if [ "$BRANCH" = "dev" ];  then
+#  echo "Currently in dev branch. Checking out master branch..."
+#  git checkout origin/master || exit 1
+#fi
 
 #echo ""
 #echo "Pulling the master branch from origin (to update it locally)..."
 #git pull origin master || exit 1
 
-echo ""
-echo "Merging the lts branch into the master branch..."
-git merge -X ours origin/lts || exit 1
+#echo ""
+#echo "Merging the lts branch into the master branch..."
+#git merge -X ours origin/lts || exit 1
 
 echo ""
 echo "Checking out the lts branch..."
