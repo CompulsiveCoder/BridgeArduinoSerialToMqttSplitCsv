@@ -110,7 +110,7 @@ namespace BridgeArduinoSerialToMqttSplitCsv
                         if (!Client.Port.IsOpen) {
                             Client.Open ();
 
-                            Thread.Sleep (3000);
+                            Thread.Sleep (2000);
                         }
 
                         while (!output.Contains ("D;") || !output.Contains (";;")) {
@@ -118,7 +118,7 @@ namespace BridgeArduinoSerialToMqttSplitCsv
                                 var value = Client.ReadLine ();
                                 if (!String.IsNullOrEmpty (value))
                                     output += value + "\n";
-                                Thread.Sleep (100);
+                                Thread.Sleep (500);
                             }
                         }
 
