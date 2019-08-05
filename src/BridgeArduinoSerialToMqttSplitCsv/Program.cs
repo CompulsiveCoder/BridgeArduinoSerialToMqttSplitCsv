@@ -118,7 +118,7 @@ namespace BridgeArduinoSerialToMqttSplitCsv
                                 var value = Client.ReadLine ();
                                 if (!String.IsNullOrEmpty (value))
                                     output += value + "\n";
-                                Thread.Sleep (500);
+                                Thread.Sleep (1000);
                             }
                         }
 
@@ -130,7 +130,7 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 
                         Publish (arguments, output, topics);
 
-                        Thread.Sleep (100);
+                        Thread.Sleep (500);
                     }
 
                 } catch (Exception ex) {
