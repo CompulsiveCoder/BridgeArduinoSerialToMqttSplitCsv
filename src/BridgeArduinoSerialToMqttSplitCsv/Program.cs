@@ -118,8 +118,8 @@ namespace BridgeArduinoSerialToMqttSplitCsv
                                 var value = Client.ReadLine ();
                                 if (!String.IsNullOrEmpty (value))
                                     output += value + "\n";
-                                Thread.Sleep (1000);
                             }
+                            Thread.Sleep (500);
                         }
 
                         //Console.WriteLine("----- Serial output");
