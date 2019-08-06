@@ -110,7 +110,7 @@ namespace BridgeArduinoSerialToMqttSplitCsv
                         if (!Client.Port.IsOpen) {
                             Client.Open ();
 
-                            Thread.Sleep (2000);
+                            Thread.Sleep (5000);
                         }
 
                         while (!output.Contains ("D;") || !output.Contains (";;")) {
@@ -119,7 +119,7 @@ namespace BridgeArduinoSerialToMqttSplitCsv
                                 if (!String.IsNullOrEmpty (value))
                                     output += value + "\n";
                             }
-                            Thread.Sleep (500);
+                            Thread.Sleep (1000);
                         }
 
                         //Console.WriteLine("----- Serial output");
