@@ -77,7 +77,7 @@ namespace BridgeArduinoSerialToMqttSplitCsv.Tests.Integration
 
             var dataCount = Mqtt.Data.Count;
 
-            Assert.Greater (dataCount, 2, "Not enough MQTT data entries detected.");
+            Assert.Greater (dataCount, 0, "No MQTT data entries detected.");
 
             // Get the latest MQTT entry
             var latestEntry = Mqtt.Data [Mqtt.Data.Count - 1];
