@@ -2,6 +2,7 @@
 using System.IO;
 using System.Reflection;
 using NUnit.Framework;
+using System.Threading;
 
 namespace BridgeArduinoSerialToMqttSplitCsv.Tests.Integration
 {
@@ -66,6 +67,8 @@ namespace BridgeArduinoSerialToMqttSplitCsv.Tests.Integration
 
             // Launch the MQTT bridge utility with a timeout
             Starter.Start (cmd);
+
+            Thread.Sleep(10000);
 
             Console.WriteLine (Starter.Output);
 
