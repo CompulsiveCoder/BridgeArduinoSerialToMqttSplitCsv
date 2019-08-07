@@ -65,7 +65,7 @@ namespace BridgeArduinoSerialToMqttSplitCsv.Tests.Integration
 			var devicePort = Environment.GetEnvironmentVariable("MQTT_BRIDGE_EXAMPLE_DEVICE_PORT");
 
 			if (String.IsNullOrEmpty(devicePort))
-				devicePort = "/dev/ttyUSB0";
+				devicePort = "/dev/ttyUSB1";
 
 			Console.WriteLine("Device port: " + devicePort);
 

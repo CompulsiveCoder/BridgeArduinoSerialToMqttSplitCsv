@@ -105,33 +105,27 @@ namespace BridgeArduinoSerialToMqttSplitCsv
                     SetupMQTT (host, userId, pass, mqttPort, deviceName, subscribeTopics);
 
                     while (isRunning) {
-                        var output = "";
-
                         if (!Client.Port.IsOpen) {
                             Client.Open ();
-                            Console.WriteLine("Opened serial port");
+                            Console.WriteLine ("Opened serial port");
 
-                            Thread.Sleep (7000);
+                            Thread.Sleep (5000);
                         }
 
-                        while (!output.Contains ("D;") || !output.Contains (";;")) {
-                            if (Client.Port.BytesToRead > 0) {
-                                var value = Client.ReadLine ();
-                                if (!String.IsNullOrEmpty (value))
-                                    output += value + "\n";
+                        while (Client.Port.BytesToRead > 0) {
+                            var value = Client.ReadLine ();
+                            if (!String.IsNullOrEmpty (value)) {
+                                if (value.Contains ("D;") && value.Contains (";;")) {
+                                    var topics = new List<string> ();
+
+                                    Publish (arguments, value, topics);
+                                }
                             }
-                            Thread.Sleep (1000);
+                            Thread.Sleep (500);
                         }
 
-                        //Console.WriteLine("----- Serial output");
-                        //Console.WriteLine(output);
-                        //Console.WriteLine("-----");
 
-                        var topics = new List<string> ();
-
-                        Publish (arguments, output, topics);
-
-                        Thread.Sleep (500);
+                        Thread.Sleep (1000);
                     }
 
                 } catch (Exception ex) {
