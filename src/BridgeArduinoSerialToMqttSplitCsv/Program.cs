@@ -109,12 +109,13 @@ namespace BridgeArduinoSerialToMqttSplitCsv
                             Client.Open ();
                             Console.WriteLine ("Opened serial port");
 
-                            Thread.Sleep (5000);
+                            Thread.Sleep (2000);
                         }
 
                         while (Client.Port.BytesToRead > 0) {
-                            var value = Client.ReadLine ();
+                            var value = Client.ReadLine ().Trim ();
                             if (!String.IsNullOrEmpty (value)) {
+                                Console.WriteLine ("> " + value.Trim ());
                                 if (value.Contains ("D;") && value.Contains (";;")) {
                                     var topics = new List<string> ();
 
@@ -241,12 +242,6 @@ namespace BridgeArduinoSerialToMqttSplitCsv
             var data = GetLastDataLine (output);
 
             if (!String.IsNullOrEmpty (data)) {
-                //if (IsVerbose)
-                //Console.WriteLine ("----- Data");
-                Console.WriteLine (data);
-                //Console.WriteLine ("-----");
-                //else
-                //	Console.WriteLine (".");
 
                 var dividerCharacter = ConfigurationSettings.AppSettings ["DividerSplitCharacter"].ToCharArray () [0];
                 var equalsCharacter = ConfigurationSettings.AppSettings ["EqualsSplitCharacter"].ToCharArray () [0];
