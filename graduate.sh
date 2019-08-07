@@ -6,6 +6,10 @@ if [ "$BRANCH" = "dev" ];  then
   echo "Graduating dev branch to master branch"
 
   echo ""
+  echo "  Cleaning workspace..."
+  sh clean.sh || exit 1
+
+  echo ""
   echo "  Fetching from origin..."
   git fetch origin || exit 1
 
