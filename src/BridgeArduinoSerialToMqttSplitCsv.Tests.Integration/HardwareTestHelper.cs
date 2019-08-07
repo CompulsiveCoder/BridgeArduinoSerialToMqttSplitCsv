@@ -244,9 +244,10 @@ namespace BridgeArduinoSerialToMqttSplitCsv.Tests.Integration
         public void ConsoleWriteSerialOutput (string output)
         {
             if (!String.IsNullOrEmpty (output)) {
-                Console.WriteLine ("----- Serial Output From Device");
-                Console.WriteLine (output);
-                Console.WriteLine ("-------------------------------");
+                foreach (var line in output.Split('\r')) {
+                    if (!String.IsNullOrEmpty (line))
+                        Console.WriteLine ("> " + line.Trim ());
+                }
             }
         }
 

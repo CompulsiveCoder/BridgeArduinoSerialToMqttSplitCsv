@@ -70,7 +70,7 @@ namespace BridgeArduinoSerialToMqttSplitCsv.Tests.Integration
 
             Thread.Sleep (5000);
 
-            Console.WriteLine (Starter.Output);
+            ConsoleWriteSerialOutput (Starter.Output);
 
             // Ensure no exceptions occurred with the MQTT bridge
             Assert.IsFalse (Starter.Output.Contains ("Exception"), "MQTT bridge raised an exception.");

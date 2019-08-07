@@ -128,7 +128,7 @@ namespace BridgeArduinoSerialToMqttSplitCsv
                         Console.SetOut (c);
                         c.WriteLine (e.Data);
                     }
-                    OutputBuilder.Append (e.Data);
+                    OutputBuilder.Append (e.Data + Environment.NewLine);
                 }
             );
 
@@ -139,7 +139,7 @@ namespace BridgeArduinoSerialToMqttSplitCsv
                         Console.SetOut (c);
                         c.WriteLine (e.Data);
                     }
-                    OutputBuilder.Append (e.Data);
+                    OutputBuilder.Append (e.Data + Environment.NewLine);
                 }
             );
 
