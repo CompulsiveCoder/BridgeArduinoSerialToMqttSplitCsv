@@ -68,7 +68,7 @@ namespace BridgeArduinoSerialToMqttSplitCsv.Tests.Integration
             // Launch the MQTT bridge utility with a timeout
             Starter.Start (cmd);
 
-            Thread.Sleep(12000);
+            Thread.Sleep (5000);
 
             Console.WriteLine (Starter.Output);
 
