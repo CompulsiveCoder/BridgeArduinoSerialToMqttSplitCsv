@@ -112,6 +112,10 @@ namespace BridgeArduinoSerialToMqttSplitCsv
                             Thread.Sleep (2000);
                         }
 
+                        if (!MqttClient.IsConnected) {
+                            SetupMQTT (host, userId, pass, mqttPort, deviceName, subscribeTopics);
+                        }
+
                         while (Client.Port.BytesToRead > 0) {
                             var value = Client.ReadLine ().Trim ();
                             if (!String.IsNullOrEmpty (value)) {
