@@ -8,6 +8,8 @@
     <RootNamespace>BridgeArduinoSerialToMqttSplitCsv.Tests.Integration</RootNamespace>
     <AssemblyName>BridgeArduinoSerialToMqttSplitCsv.Tests.Integration</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <ProductVersion>12.0.0</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -31,7 +33,6 @@
     <Reference Include="System" />
     <Reference Include="nunit.framework">
       <HintPath>..\..\lib\NUnit.2.6.4\lib\nunit.framework.dll</HintPath>
-      <Package>nunit</Package>
     </Reference>
     <Reference Include="M2Mqtt.Net">
       <HintPath>..\..\lib\M2Mqtt\lib\net45\M2Mqtt.Net.dll</HintPath>
