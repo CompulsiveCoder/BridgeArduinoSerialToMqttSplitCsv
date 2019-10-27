@@ -198,8 +198,8 @@ namespace BridgeArduinoSerialToMqttSplitCsv.Tests.Integration
       Console.WriteLine ("Publishing error: " + error);
       var errorTopic = DeviceName + "/Error";
       Client.Publish (errorTopic, Encoding.UTF8.GetBytes (error),
-                  MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE, // QoS level
-                  true);
+                      MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE, // QoS level
+                      true);
       PublishStatus (1, "Failed");
     }
 
@@ -230,8 +230,8 @@ namespace BridgeArduinoSerialToMqttSplitCsv.Tests.Integration
       Console.WriteLine ("Publishing status message: " + message);
       var statusMessageTopic = DeviceName + "/StatusMessage";
       Client.Publish (statusMessageTopic, Encoding.UTF8.GetBytes (message),
-                  MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE, // QoS level
-                  true);
+                      MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE, // QoS level
+                      true);
     }
 
     public void client_MqttMsgPublishReceived (object sender, MqttMsgPublishEventArgs e)
@@ -280,7 +280,7 @@ namespace BridgeArduinoSerialToMqttSplitCsv.Tests.Integration
     public string GetTopicKey (string topic)
     {
       var parts = topic.Split ('/');
-      var key = parts [2];
+      var key = parts [1];
 
       return key;
     }
