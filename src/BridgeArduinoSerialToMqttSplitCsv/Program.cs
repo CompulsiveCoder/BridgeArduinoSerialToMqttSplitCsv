@@ -28,6 +28,8 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 
     public static void Main (string[] args)
     {
+      Console.Title = "MQTTBridge";
+    
       var arguments = new Arguments (args);
 
       Run (arguments);
@@ -159,8 +161,8 @@ namespace BridgeArduinoSerialToMqttSplitCsv
           var version = fvi.FileVersion;
 
           MqttClient.Publish (deviceName + "/bridge/version", Encoding.UTF8.GetBytes (version),
-                                        MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE, // QoS level
-                                        true);
+                              MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE, // QoS level
+                              true);
 
           IsMqttConnected = true;
                     
@@ -275,8 +277,8 @@ namespace BridgeArduinoSerialToMqttSplitCsv
                 topics.Add (fullTopic);
 
               MqttClient.Publish (fullTopic, Encoding.UTF8.GetBytes (value),
-                                                MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE, // QoS level
-                                                true);
+                                  MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE, // QoS level
+                                  true);
             }
           }
         }
@@ -289,8 +291,8 @@ namespace BridgeArduinoSerialToMqttSplitCsv
           Console.WriteLine (timeTopic + ":" + time);
 
         MqttClient.Publish (timeTopic, Encoding.UTF8.GetBytes (time),
-                                    MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE, // QoS level
-                                    true);
+                            MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE, // QoS level
+                            true);
 
         // TODO: Remove if not needed. This triggers push notifications which should
         // be used for alerts not just for data
