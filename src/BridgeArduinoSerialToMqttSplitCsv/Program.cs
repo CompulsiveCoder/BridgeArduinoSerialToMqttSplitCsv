@@ -121,7 +121,7 @@ namespace BridgeArduinoSerialToMqttSplitCsv
                   Publish (arguments, value, topics);
                 }
               }
-              Thread.Sleep (200);
+              Thread.Sleep (10);
             }
 
 
@@ -259,10 +259,9 @@ namespace BridgeArduinoSerialToMqttSplitCsv
         var summaryValue = "";
 
         foreach (var item in data.Split(dividerCharacter)) {
-          var parts = item.Split (equalsCharacter);
-          if (parts.Length == 2) {
-            var key = parts [0];
-            var value = parts [1];
+          if (item.Contains (equalsCharacter.ToString ())) {
+            var key = item.Substring (0, item.IndexOf (equalsCharacter));
+            var value = item.Substring (item.IndexOf (equalsCharacter) + 1, item.Length - item.IndexOf (equalsCharacter) - 1);
 
             if (!String.IsNullOrEmpty (value)) {
               if (key == summaryKey)
