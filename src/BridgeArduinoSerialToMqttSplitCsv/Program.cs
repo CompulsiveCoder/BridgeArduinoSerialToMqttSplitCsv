@@ -24,7 +24,10 @@ namespace BridgeArduinoSerialToMqttSplitCsv
     public static int WaitTimeBeforeRetry = 3;
     public static string SelfHostName = String.Empty;
     public static MqttClient MqttClient = null;
-    public static bool IsMqttConnected = false;
+
+    public static bool IsMqttConnected {
+      get { return MqttClient != null && MqttClient.IsConnected; }
+    }
 
     public static void Main (string[] args)
     {
@@ -164,8 +167,6 @@ namespace BridgeArduinoSerialToMqttSplitCsv
             MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE, // QoS level
             true);
 
-          IsMqttConnected = true;
-                    
           Console.WriteLine ("Connected to MQTT broker");
         } catch (Exception ex) {
           Console.WriteLine ("Failed to connect.");
