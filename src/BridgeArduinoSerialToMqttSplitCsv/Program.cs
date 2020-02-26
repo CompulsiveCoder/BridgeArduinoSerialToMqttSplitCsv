@@ -25,6 +25,14 @@ namespace BridgeArduinoSerialToMqttSplitCsv
     public static string SelfHostName = String.Empty;
     public static MqttClient MqttClient = null;
 
+    public static string DeviceName = "";
+
+    public static string MqttHost = "";
+    public static string MqttUserId = "";
+    public static string MqttPassword = "";
+    public static int MqttPort = 1883;
+    public static string[] MqttSubscribeTopics = new string[]{ };
+
     public static bool IsMqttConnected {
       get { return MqttClient != null && MqttClient.IsConnected; }
     }
@@ -43,14 +51,17 @@ namespace BridgeArduinoSerialToMqttSplitCsv
       SelfHostName = GetSelfHostName ();
 
       IsVerbose = arguments.Contains ("v");
-      var userId = GetConfigValue (arguments, "UserId");
-      var pass = GetConfigValue (arguments, "Password");
-      var host = GetConfigValue (arguments, "Host");
-      var mqttPort = Convert.ToInt32 (GetConfigValue (arguments, "MqttPort"));
-      var deviceName = GetConfigValue (arguments, "DeviceName");
+      MqttUserId = GetConfigValue (arguments, "UserId");
+      MqttPassword = GetConfigValue (arguments, "Password");
+      MqttHost = GetConfigValue (arguments, "Host");
+      MqttPort = Convert.ToInt32 (GetConfigValue (arguments, "MqttPort"));
+      DeviceName = GetConfigValue (arguments, "DeviceName");
+
+      MqttSubscribeTopics = GetSubscribeTopics (arguments);
+
       var serialPortName = GetConfigValue (arguments, "SerialPort");
       var serialBaudRate = Convert.ToInt32 (GetConfigValue (arguments, "SerialBaudRate"));
-      var topicPrefix = userId;
+      var topicPrefix = MqttUserId;
       var useTopicPrefix = Convert.ToBoolean (ConfigurationSettings.AppSettings ["UseTopicPrefix"]);
       IncomingKeyValueSeparator = GetConfigValue (arguments, "IncomingKeyValueSeparator");
 
@@ -61,12 +72,12 @@ namespace BridgeArduinoSerialToMqttSplitCsv
       var emailAddress = GetConfigValue (arguments, "EmailAddress");
       var smtpServer = GetConfigValue (arguments, "SmtpServer");
 
-      if (mqttPort == 0)
-        mqttPort = 1883;
+      if (MqttPort == 0)
+        MqttPort = 1883;
 
-      Console.WriteLine ("Host: " + host);
-      Console.WriteLine ("UserId: " + userId);
-      Console.WriteLine ("Port: " + mqttPort);
+      Console.WriteLine ("Host: " + MqttHost);
+      Console.WriteLine ("UserId: " + MqttUserId);
+      Console.WriteLine ("Port: " + MqttPort);
       Console.WriteLine ("Wait time before retry: " + WaitTimeBeforeRetry + " seconds");
       //Console.WriteLine ("Host: " + host);
 
@@ -75,7 +86,7 @@ namespace BridgeArduinoSerialToMqttSplitCsv
       Console.WriteLine ("Device name: " + GetConfigValue (arguments, "DeviceName"));
       Console.WriteLine ("Serial port name: " + serialPortName);
 
-      var deviceTopic = deviceName;
+      var deviceTopic = DeviceName;
 
       if (useTopicPrefix)
         deviceTopic = topicPrefix + deviceTopic;
@@ -98,9 +109,7 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 
           var isRunning = true;
 
-          var subscribeTopics = GetSubscribeTopics (arguments);
-
-          SetupMQTT (host, userId, pass, mqttPort, deviceName, subscribeTopics);
+          SetupMQTT (MqttHost, MqttUserId, MqttPassword, MqttPort, DeviceName, MqttSubscribeTopics);
 
           while (isRunning) {
             if (!Client.Port.IsOpen) {
@@ -111,7 +120,8 @@ namespace BridgeArduinoSerialToMqttSplitCsv
             }
 
             if (!MqttClient.IsConnected) {
-              SetupMQTT (host, userId, pass, mqttPort, deviceName, subscribeTopics);
+              Console.WriteLine ("MQTT is not connected. Reconnecting...");
+              SetupMQTT (MqttHost, MqttUserId, MqttPassword, MqttPort, DeviceName, MqttSubscribeTopics);
             }
 
             while (Client.Port.BytesToRead > 0) {
@@ -137,7 +147,7 @@ namespace BridgeArduinoSerialToMqttSplitCsv
           Console.WriteLine ();
           Console.WriteLine ("Waiting for " + WaitTimeBeforeRetry + " seconds then retrying");
 
-          SendErrorEmail (ex, deviceName, serialPortName, smtpServer, emailAddress);
+          SendErrorEmail (ex, DeviceName, serialPortName, smtpServer, emailAddress);
 
           Thread.Sleep (WaitTimeBeforeRetry * 1000);
         }
@@ -152,7 +162,8 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 
           var clientId = Guid.NewGuid ().ToString ();
 
-          MqttClient.MqttMsgPublishReceived += client_MqttMsgPublishReceived;
+          MqttClient.MqttMsgPublishReceived += MqttClient_MqttMsgPublishReceived;
+          MqttClient.ConnectionClosed += MqttClient_ConnectionClosed;
           MqttClient.Connect (clientId, mqttUsername, mqttPassword);
 
           foreach (var topic in subscribeTopics) {
@@ -177,6 +188,12 @@ namespace BridgeArduinoSerialToMqttSplitCsv
           Thread.Sleep (WaitTimeBeforeRetry * 1000);
         }
       }
+    }
+
+    static void MqttClient_ConnectionClosed (object sender, EventArgs e)
+    {
+      Console.WriteLine ("MQTT connection closed. Reconnecting...");
+      SetupMQTT (MqttHost, MqttUserId, MqttPassword, MqttPort, DeviceName, MqttSubscribeTopics);
     }
 
     public static SerialPort GetDevicePort (string serialPortName, int serialBaudRate)
@@ -315,7 +332,7 @@ namespace BridgeArduinoSerialToMqttSplitCsv
       }
     }
 
-    public static void client_MqttMsgPublishReceived (object sender, MqttMsgPublishEventArgs e)
+    public static void MqttClient_MqttMsgPublishReceived (object sender, MqttMsgPublishEventArgs e)
     {
       var topic = e.Topic;
       var topicSections = topic.Split ('/');
