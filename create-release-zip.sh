@@ -30,10 +30,7 @@ cp $BIN_RELEASE_FOLDER/duinocom.core.dll $TMP_RELEASE_FOLDER/
 cp $BIN_RELEASE_FOLDER/nunit.framework.dll $TMP_RELEASE_FOLDER/
 cp $BIN_RELEASE_FOLDER/M2Mqtt.Net.dll $TMP_RELEASE_FOLDER/
 
-BUILD_NUMBER="$(cat buildnumber.txt)"
-VERSION="$(cat version.txt)"
-
-echo "$VERSION.$BUILD_NUMBER" > $TMP_RELEASE_FOLDER/version.txt
+echo "$VERSION" > $TMP_RELEASE_FOLDER/version.txt
 
 mkdir -p $RELEASES_FOLDER
 
