@@ -39,10 +39,23 @@ mkdir -p $RELEASES_FOLDER
 
 cd .tmp/BridgeArduinoSerialToMqttSplitCsv
 
+echo ""
+echo "  Zipping release..."
 zip -r $DIR/releases/BridgeArduinoSerialToMqttSplitCsv.$VERSION$VERSION_POSTFIX.zip *
+
+cd $DIR/releases
+
+echo ""
+echo "  Unzipping release..."
+unzip BridgeArduinoSerialToMqttSplitCsv.$VERSION$VERSION_POSTFIX.zip -d BridgeArduinoSerialToMqttSplitCsv.$VERSION$VERSION_POSTFIX
+
+echo ""
+echo "  Listing release contents..."
+ls BridgeArduinoSerialToMqttSplitCsv.$VERSION$VERSION_POSTFIX -R
 
 cd $DIR
 
 rm .tmp -r
 
+echo ""
 echo "Finished packaging release zip file."
