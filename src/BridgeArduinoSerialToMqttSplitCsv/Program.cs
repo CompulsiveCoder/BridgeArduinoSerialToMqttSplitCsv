@@ -12,6 +12,7 @@ using uPLibrary.Networking.M2Mqtt;
 using uPLibrary.Networking.M2Mqtt.Messages;
 using System.Diagnostics;
 using System.Net.Mail;
+using System.Net;
 
 namespace BridgeArduinoSerialToMqttSplitCsv
 {
@@ -71,6 +72,9 @@ namespace BridgeArduinoSerialToMqttSplitCsv
 
       var emailAddress = GetConfigValue (arguments, "EmailAddress");
       var smtpServer = GetConfigValue (arguments, "SmtpServer");
+      var smtpUsername = GetConfigValue (arguments, "SmtpUsername");
+      var smtpPassword = GetConfigValue (arguments, "SmtpPassword");
+      var smtpPort = Convert.ToInt32 (GetConfigValue (arguments, "SmtpPort"));
 
       if (MqttPort == 0)
         MqttPort = 1883;
@@ -147,7 +151,7 @@ namespace BridgeArduinoSerialToMqttSplitCsv
           Console.WriteLine ();
           Console.WriteLine ("Waiting for " + WaitTimeBeforeRetry + " seconds then retrying");
 
-          SendErrorEmail (ex, DeviceName, serialPortName, smtpServer, emailAddress);
+          SendErrorEmail (ex, DeviceName, serialPortName, smtpServer, emailAddress, smtpUsername, smtpPassword, smtpPort);
 
           Thread.Sleep (WaitTimeBeforeRetry * 1000);
         }
@@ -212,7 +216,7 @@ namespace BridgeArduinoSerialToMqttSplitCsv
       return port;
     }
 
-    public static void SendErrorEmail (Exception error, string deviceName, string portName, string smtpServer, string emailAddress)
+    public static void SendErrorEmail (Exception error, string deviceName, string serialPort, string smtpServer, string emailAddress, string smtpUsername, string smtpPassword, int smtpPort)
     {
       var areDetailsProvided = (smtpServer != "mail.example.com" &&
                                emailAddress != "user@example.com" &&
@@ -228,11 +232,21 @@ namespace BridgeArduinoSerialToMqttSplitCsv
             notes = "The device was likely disconnected. If it was intentionally disconnected then you can ignore this error. If it wasn't intentionally disconnected then it may be malfunctioning.\n\n";
 
           var subject = "Error: MQTT bridge for device '" + deviceName + "' on '" + SelfHostName + "'";
-          var body = "The following error was thrown by the MQTT bridge utility...\n\nSource host: " + SelfHostName + "\n\nDevice name: " + deviceName + "\n\nPort name:" + portName + "\n\n" + notes + error.ToString ();
+          var body = "The following error was thrown by the MQTT bridge utility...\n\nSource host: " + SelfHostName + "\n\nDevice name: " + deviceName + "\n\nPort name:" + serialPort + "\n\n" + notes + error.ToString () + "\n\n\n\n--------------------\n\nEmail sent by MQTT bridge.";
 
           var mail = new MailMessage (emailAddress, emailAddress, subject, body);
 
-          var smtpClient = new SmtpClient (smtpServer);
+          var smtpClient = new SmtpClient (smtpServer, smtpPort);
+
+          var credentialsAreProvided = (smtpUsername != "user" &&
+                                       smtpPassword != "pass" &&
+                                       smtpUsername != "na" &&
+                                       smtpPassword != "na" &&
+                                       !String.IsNullOrWhiteSpace (smtpUsername) &&
+                                       !String.IsNullOrWhiteSpace (smtpPassword));
+
+          if (credentialsAreProvided)
+            smtpClient.Credentials = new NetworkCredential (smtpUsername, smtpPassword);
 
           smtpClient.Send (mail);
 
@@ -241,6 +255,9 @@ namespace BridgeArduinoSerialToMqttSplitCsv
           Console.WriteLine ("An error occurred while sending error report...");
           Console.WriteLine ("SMTP Server: " + smtpServer);
           Console.WriteLine ("Email Address: " + emailAddress);
+          Console.WriteLine ("SMTP Username: " + smtpUsername);
+          Console.WriteLine ("SMTP Password: [hidden]");
+          Console.WriteLine ("SMTP Port: " + smtpPort);
           Console.WriteLine ("");
           Console.WriteLine (ex.ToString ());
           Console.WriteLine ("");
